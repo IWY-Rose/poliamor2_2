@@ -1,0 +1,22 @@
+{
+  "name": "poliamor2_2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "three": "0.152.0"
+  },
+  "devDependencies": {
+    "@types/draco3dgltf": "^1.4.3",
+    "vite": "^6.0.11"
+  }
+}
