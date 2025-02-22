@@ -19,9 +19,11 @@ class GameEngine {
         this.crosshair.style.display = 'none'; // Hide crosshair
         document.body.style.cursor = 'default'; // Restore cursor
         this.planeMesh = null; // Store reference to Plane001
-        this.gravity = -9.8; // m/s²
+        this.gravity = -50000; // Increased from -9.8 to -25 (much stronger pull)
         this.velocityY = 0;
         this.isGrounded = false;
+        this.movementSpeedMultiplier = 1.6; // 1.6x speed boost
+        this.maxRadius = 1000000;  // Increased from 100,000 to 1,000,000
     }
 
     async init() {
@@ -37,20 +39,20 @@ class GameEngine {
             45,
             window.innerWidth / window.innerHeight,
             0.1,
-            100000  // Maximum render distance to 100,000 units
+            1000000  // Increased from 100,000 to 1,000,000
         );
         this.modelCenter = new THREE.Vector3(0, -5, 0); // Model's position from setupScene
         this.camera.position.set(0, 25, 50);
         this.camera.lookAt(this.modelCenter);
 
         // Orbital radius range
-        this.maxRadius = 100000;  // New maximum distance
+        this.maxRadius = 1000000;  // New maximum distance
         
         // Load both models
         try {
             console.log('Starting model load...');
             const [baseModel, newModel] = await Promise.all([
-                this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/mapita2.glb`),
+                this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/16064_autosave222.glb`),
                 this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/newproject.glb`)
             ]);
             
@@ -70,6 +72,10 @@ class GameEngine {
         // After scene creation
         console.log('THREE exists?', typeof THREE !== 'undefined');
         console.log('Scene children:', this.scene.children);
+
+        // In init() after models load
+        const gui = new GUI();
+        gui.add(this, 'movementSpeedMultiplier', 0.5, 30.0).name('Speed Multiplier');
     }
 
     setupScene(baseModel, newModel) {
@@ -136,12 +142,12 @@ class GameEngine {
         const coneBBox = new THREE.Box3().setFromObject(coneMesh);
         const coneHeight = coneBBox.max.y - coneBBox.min.y;
 
-        // Position new model 5 units above plane
+        // Position new model (modified Y position)
         this.newModel = newModel;
         newModel.scale.set(90, 90, 90);
         newModel.position.set(
             planePosition.x - 18000,
-            planePosition.y + planeHeight - 8040,  // Changed from +1 to +5
+            planePosition.y + planeHeight - 35000,  // Changed from -8040 to -8045 (5 units lower)
             planePosition.z + 15000
         );
         newModel.rotation.set(0, 0, 0);
@@ -209,14 +215,16 @@ class GameEngine {
         console.log('Base Model Structure:');
         baseModel.traverse(child => {
             if (child.isMesh) {
-                console.log('Base Model Part:', child.name, child.type, child.position);
+                console.log('Base Model Part:', child.name, child.type);
+                this.logTextures(child);
             }
         });
 
         console.log('New Model Structure:');
         newModel.traverse(child => {
             if (child.isMesh) {
-                console.log('New Model Part:', child.name, child.type, child.position);
+                console.log('New Model Part:', child.name, child.type);
+                this.logTextures(child);
             }
         });
 
@@ -226,6 +234,12 @@ class GameEngine {
                 this.planeMesh = child;
             }
         });
+
+        // Store player model reference and calculate height
+        newModel.updateMatrixWorld(true); // Ensure transformations are applied
+        const playerBBox = new THREE.Box3().setFromObject(newModel);
+        this.playerHeight = playerBBox.max.y - playerBBox.min.y;
+        console.log('Calculated player height:', this.playerHeight);
     }
 
     getModelBoundingBox(model) {
@@ -270,10 +284,9 @@ class GameEngine {
     handleMovement(deltaTime) {
         if (!this.newModel || !this.planeMesh) return;
 
-        const moveSpeed = 500 * deltaTime;
-        const verticalSpeed = 500 * deltaTime;
-
-        // Get camera's forward direction (flattened to XZ plane)
+        const moveSpeed = 800 * this.movementSpeedMultiplier * deltaTime;
+        
+        // Get camera's forward direction (always where the camera is pointing)
         const cameraForward = new THREE.Vector3();
         this.camera.getWorldDirection(cameraForward);
         cameraForward.y = 0;
@@ -284,16 +297,8 @@ class GameEngine {
             .crossVectors(new THREE.Vector3(0, 1, 0), cameraForward)
             .normalize();
 
-        // Calculate target rotation from camera direction
-        const targetRotation = Math.atan2(
-            cameraForward.z, 
-            cameraForward.x
-        ) - Math.PI/2;
-
-        // Smoothly rotate model to face movement direction
-        const currentRotation = this.newModel.rotation.y;
-        const deltaRotation = targetRotation - currentRotation;
-        this.newModel.rotation.y += deltaRotation * this.rotationSpeed * deltaTime;
+        // Always face the direction the camera is looking
+        this.newModel.rotation.y = Math.atan2(cameraForward.x, cameraForward.z);
 
         // Camera-relative movement
         if (this.keys['w']) this.newModel.position.add(cameraForward.multiplyScalar(moveSpeed));
@@ -301,10 +306,8 @@ class GameEngine {
         if (this.keys['d']) this.newModel.position.add(cameraRight.multiplyScalar(-moveSpeed));
         if (this.keys['a']) this.newModel.position.add(cameraRight.multiplyScalar(moveSpeed));
 
-        // Apply gravity
+        // Apply stronger gravity ONLY to player
         this.velocityY += this.gravity * deltaTime;
-
-        // Update Y position with velocity
         this.newModel.position.y += this.velocityY * deltaTime;
 
         // Ground collision check
@@ -313,32 +316,61 @@ class GameEngine {
             this.newModel.position.z
         );
         
-        if (surfaceY !== undefined && this.newModel.position.y <= surfaceY + 1) {
-            this.newModel.position.y = surfaceY + 1;
+        if (surfaceY !== undefined) {
+            // Use 10% of player height as clearance
+            const groundClearance = this.playerHeight * 0.1;
+            
+            if (this.newModel.position.y <= surfaceY + groundClearance) {
+                this.newModel.position.y = surfaceY + groundClearance;
+                this.velocityY = 0;
+                this.isGrounded = true;
+            } else {
+                this.isGrounded = false;
+            }
+        }
+
+        // Force precise position alignment when grounded
+        if (this.isGrounded && !this.keys[' ']) {
             this.velocityY = 0;
-            this.isGrounded = true;
-        } else {
-            this.isGrounded = false;
+            // Directly set to surface without offset
+            const currentSurfaceY = this.getSurfaceHeight(
+                this.newModel.position.x,
+                this.newModel.position.z
+            );
+
+            
+            if (currentSurfaceY !== undefined) {
+                this.newModel.position.y = currentSurfaceY;
+            }
         }
 
-        // Jump mechanic
+        // Increased jump force to match stronger gravity
         if (this.isGrounded && this.keys[' ']) {
-            this.velocityY = 5; // Jump force
+            this.velocityY = 12; // Increased from 7 to 12
         }
 
-        // Update camera focus
+        // Update camera focus (maintain relative position)
         this.modelCenter.copy(this.newModel.position);
-        this.updateCameraPosition();
+
+        
+        console.log('Player Y:', this.newModel.position.y, 
+            'Velocity Y:', this.velocityY,
+            'Grounded:', this.isGrounded);
+            
     }
 
     animate() {
         let lastTime = performance.now();
+        let maxDelta = 1/30; // Max 30ms frame time (≈33ms per frame)
         
         const animateFrame = (now) => {
             requestAnimationFrame(animateFrame);
             
-            const deltaTime = (now - lastTime) / 1000;
+            let deltaTime = (now - lastTime) / 1000;
             lastTime = now;
+
+            // Prevent physics explosions when tab is backgrounded
+            deltaTime = Math.min(deltaTime, maxDelta);
 
             this.handleCameraRotation(deltaTime);
             this.handleMovement(deltaTime);
@@ -385,7 +417,7 @@ class GameEngine {
     getSurfaceHeight(x, z) {
         const meshesToTest = [];
         this.scene.traverse(child => {
-            if (child.isMesh && !child.name.toLowerCase().includes('images')) {
+            if (child.isMesh && !child.name.toLowerCase().includes('image')) {
                 meshesToTest.push(child);
             }
         });
@@ -393,12 +425,48 @@ class GameEngine {
         if (meshesToTest.length === 0) return undefined;
         
         const raycaster = new THREE.Raycaster();
-        const start = new THREE.Vector3(x, 1000, z);
+        // Cast from extremely high to extremely low
+        const start = new THREE.Vector3(
+            x, 
+            1000000,  // Start at 1 million units up
+            z
+        );
         const direction = new THREE.Vector3(0, -1, 0);
         raycaster.set(start, direction);
+        raycaster.far = 2000000;  // Cast 2 million units down
         
         const intersects = raycaster.intersectObjects(meshesToTest);
         return intersects.length > 0 ? intersects[0].point.y : undefined;
+    }
+
+    logTextures(mesh) {
+        if (!mesh.material) return;
+        
+        const materials = Array.isArray(mesh.material) ? 
+            mesh.material : [mesh.material];
+            
+        materials.forEach((material, index) => {
+            console.group(`Material ${index} for ${mesh.name}`);
+            console.log('Material type:', material.type);
+            
+            const textureTypes = [
+                'map', 'normalMap', 'roughnessMap', 
+                'metalnessMap', 'aoMap', 'displacementMap'
+            ];
+            
+            textureTypes.forEach(type => {
+                if (material[type]) {
+                    console.log(
+                        `${type}:`, 
+                        material[type].image ? 
+                            material[type].image.src : 
+                            'Texture exists but no image data'
+                    );
+                }
+            });
+            
+            console.groupEnd();
+        });
     }
 }
 
