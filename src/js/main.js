@@ -24,6 +24,9 @@ class GameEngine {
         this.isGrounded = false;
         this.movementSpeedMultiplier = 1.6; // 1.6x speed boost
         this.maxRadius = 1000000;  // Increased from 100,000 to 1,000,000
+        this.coordDisplay = this.createCoordinateDisplay();
+        this.currentCollisionMesh = null;
+        this.currentGroundMesh = null;
     }
 
     async init() {
@@ -147,10 +150,12 @@ class GameEngine {
         newModel.scale.set(90, 90, 90);
         newModel.position.set(
             planePosition.x - 18000,
-            planePosition.y + planeHeight - 35000,  // Changed from -8040 to -8045 (5 units lower)
+            planePosition.y + planeHeight - 35000,
             planePosition.z + 15000
         );
-        newModel.rotation.set(0, 0, 0);
+        
+        // Store original position as offset
+        this.coordinateOffset = new THREE.Vector3().copy(newModel.position);
 
         // Add both models to scene
         this.scene.add(baseModel, newModel);
@@ -235,11 +240,13 @@ class GameEngine {
             }
         });
 
-        // Store player model reference and calculate height
-        newModel.updateMatrixWorld(true); // Ensure transformations are applied
+        // Store player model reference and calculate dimensions
+        newModel.updateMatrixWorld(true);
         const playerBBox = new THREE.Box3().setFromObject(newModel);
         this.playerHeight = playerBBox.max.y - playerBBox.min.y;
-        console.log('Calculated player height:', this.playerHeight);
+        this.playerHalfWidth = (playerBBox.max.x - playerBBox.min.x) / 2;
+        this.playerHalfDepth = (playerBBox.max.z - playerBBox.min.z) / 2;
+        console.log('Calculated player dimensions:', this.playerHeight, this.playerHalfWidth, this.playerHalfDepth);
     }
 
     getModelBoundingBox(model) {
@@ -306,57 +313,160 @@ class GameEngine {
         if (this.keys['d']) this.newModel.position.add(cameraRight.multiplyScalar(-moveSpeed));
         if (this.keys['a']) this.newModel.position.add(cameraRight.multiplyScalar(moveSpeed));
 
-        // Apply stronger gravity ONLY to player
-        this.velocityY += this.gravity * deltaTime;
-        this.newModel.position.y += this.velocityY * deltaTime;
-
-        // Ground collision check
-        const surfaceY = this.getSurfaceHeight(
-            this.newModel.position.x, 
-            this.newModel.position.z
-        );
+        // Horizontal collision check (4 directions)
+        const directions = [
+            new THREE.Vector3(1, 0, 0),  // Right
+            new THREE.Vector3(-1, 0, 0), // Left
+            new THREE.Vector3(0, 0, 1),  // Forward
+            new THREE.Vector3(0, 0, -1)  // Backward
+        ];
         
-        if (surfaceY !== undefined) {
-            // Use 10% of player height as clearance
-            const groundClearance = this.playerHeight * 0.1;
+        const collisionDistance = 10; // Detection distance in units
+        let collisionDetected = false;
+
+        // List of meshes that trigger player reset (remove Cone002)
+        const resetMeshes = [
+            'Cube001', 'Cube002', 'Cube003', 'Cube005', 'Cube006',
+            'Cone', 'Cone001',  // Removed Cone002 from reset list
+            'images', 'images001', 'images002', 'images003', 'images004', 'images005',
+            'Sphere', 'Sphere001',
+            'Cylinder', 'Cylinder001'
+        ];
+
+        directions.forEach(dir => {
+            const raycaster = new THREE.Raycaster(
+                this.newModel.position, 
+                dir, 
+                0, 
+                collisionDistance
+            );
             
-            if (this.newModel.position.y <= surfaceY + groundClearance) {
-                this.newModel.position.y = surfaceY + groundClearance;
+            const intersects = raycaster.intersectObjects(this.scene.children, true);
+            intersects.forEach(intersect => {
+                if (intersect.object.isMesh) {
+                    if (resetMeshes.includes(intersect.object.name)) {
+                        collisionDetected = true;
+                    }
+                    else if (intersect.object.name === 'Cone002') {
+                        // Get Cone002's world position and bounding box
+                        const cone = intersect.object;
+                        cone.updateMatrixWorld(true);
+                        const bbox = new THREE.Box3().setFromObject(cone);
+                        
+                        // Teleport to top of cone
+                        this.newModel.position.set(
+                            cone.position.x,
+                            bbox.max.y + this.playerHeight/2,  // Stand on top
+                            cone.position.z
+                        );
+                        
+                        // Reset vertical velocity
+                        this.velocityY = 0;
+                        this.isGrounded = true;
+                        this.currentCollisionMesh = cone;
+                    }
+                    else if (intersect.object.name === 'Cube004' && this.newModel.position.y < -1575) {
+                        // Clamp Y position to -1575 but allow X/Z movement
+                        this.newModel.position.y = -1575;
+                        this.velocityY = 0;
+                        this.isGrounded = true;
+                        this.currentCollisionMesh = intersect.object;
+                    }
+                }
+            });
+        });
+
+        // Reset player if collision detected with specified meshes
+        if (collisionDetected) {
+            this.newModel.position.copy(this.coordinateOffset);
+            this.velocityY = 0;
+            this.isGrounded = true;
+        }
+
+        if (this.isGrounded && this.newModel.position.y == -3000) {
+                // Clamp Y position to -1575 but allow X/Z movement
+                this.newModel.position.y = -1575;
                 this.velocityY = 0;
                 this.isGrounded = true;
-            } else {
-                this.isGrounded = false;
+                this.currentCollisionMesh = intersect.object;
             }
-        }
 
-        // Force precise position alignment when grounded
-        if (this.isGrounded && !this.keys[' ']) {
+        // Existing Y-axis reset (keep this)
+        if (this.newModel.position.y <= -16000) {
+            this.newModel.position.copy(this.coordinateOffset);
             this.velocityY = 0;
-            // Directly set to surface without offset
-            const currentSurfaceY = this.getSurfaceHeight(
-                this.newModel.position.x,
-                this.newModel.position.z
-            );
+            this.isGrounded = true;
+        }
 
-            
-            if (currentSurfaceY !== undefined) {
-                this.newModel.position.y = currentSurfaceY;
+        // Enhanced vertical collision detection
+        const meshesToTest = [];
+        this.scene.traverse(child => {
+            if (child.isMesh && !child.name.toLowerCase().includes('image')) {
+                meshesToTest.push(child);
             }
+        });
+
+        // Vertical collision check covering full player height
+        const playerTop = this.newModel.position.y + this.playerHeight/2;
+        const playerBottom = this.newModel.position.y - this.playerHeight/2;
+        
+        // Check vertical collisions first
+        const verticalRaycaster = new THREE.Raycaster(
+            new THREE.Vector3(this.newModel.position.x, playerTop, this.newModel.position.z),
+            new THREE.Vector3(0, -1, 0),
+            0,
+            this.playerHeight // Check through entire player height
+        );
+        
+        const verticalHit = verticalRaycaster.intersectObjects(meshesToTest)[0];
+        if (verticalHit) {
+            // Calculate surface position based on hit point
+            const surfaceY = verticalHit.point.y;
+            
+            if (this.velocityY < 0) { // Moving downward
+                // Position player on top of surface with full height
+                this.newModel.position.y = surfaceY + this.playerHeight/2;
+                this.velocityY = 0;
+                this.isGrounded = true;
+                this.currentCollisionMesh = verticalHit.object;
+            } else if (this.velocityY > 0) { // Moving upward
+                // Position player below ceiling
+                this.newModel.position.y = surfaceY - this.playerHeight/2 - 1;
+                this.velocityY = 0;
+            }
+        } else {
+            this.isGrounded = false;
+            this.currentCollisionMesh = null;
         }
 
-        // Increased jump force to match stronger gravity
-        if (this.isGrounded && this.keys[' ']) {
-            this.velocityY = 12; // Increased from 7 to 12
+        // Apply gravity only if not grounded
+        if (!this.isGrounded) {
+            this.velocityY += this.gravity * deltaTime;
+            this.newModel.position.y += this.velocityY * deltaTime;
         }
+
+        // Reset player if falls below -34000 Y position
+        if (this.newModel.position.y <= -16000) {
+            this.newModel.position.copy(this.coordinateOffset);
+            this.velocityY = 0;
+            this.isGrounded = true;
+        }
+
+        // Update coordinate display with offset adjustment
+        const pos = this.newModel.position.clone().sub(this.coordinateOffset);
+        const meshName = this.currentCollisionMesh ? 
+            (this.currentCollisionMesh.name || 'Unnamed Mesh') : 'None';
+        
+        this.coordDisplay.textContent = 
+            `X: ${pos.x.toFixed(1)} \u2022 ` +
+            `Y: ${pos.y.toFixed(1)} \u2022 ` +
+            `Z: ${pos.z.toFixed(1)} \n` +
+            `VelY: ${this.velocityY.toFixed(1)} \u2022 ` +
+            `Grounded: ${this.isGrounded} \n` +
+            `Colliding with: ${meshName}`;
 
         // Update camera focus (maintain relative position)
         this.modelCenter.copy(this.newModel.position);
-
-        
-        console.log('Player Y:', this.newModel.position.y, 
-            'Velocity Y:', this.velocityY,
-            'Grounded:', this.isGrounded);
-            
     }
 
     animate() {
@@ -414,6 +524,23 @@ class GameEngine {
         return div;
     }
 
+    createCoordinateDisplay() {
+        const div = document.createElement('div');
+        div.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-family: monospace;
+            background: rgba(0,0,0,0.7);
+            padding: 8px;
+            border-radius: 4px;
+            z-index: 1000;
+        `;
+        document.body.appendChild(div);
+        return div;
+    }
+
     getSurfaceHeight(x, z) {
         const meshesToTest = [];
         this.scene.traverse(child => {
@@ -425,18 +552,37 @@ class GameEngine {
         if (meshesToTest.length === 0) return undefined;
         
         const raycaster = new THREE.Raycaster();
-        // Cast from extremely high to extremely low
-        const start = new THREE.Vector3(
-            x, 
-            1000000,  // Start at 1 million units up
-            z
-        );
         const direction = new THREE.Vector3(0, -1, 0);
-        raycaster.set(start, direction);
-        raycaster.far = 2000000;  // Cast 2 million units down
+        raycaster.far = 2000000;
         
-        const intersects = raycaster.intersectObjects(meshesToTest);
-        return intersects.length > 0 ? intersects[0].point.y : undefined;
+        // Check multiple points around player's base
+        const testPoints = [
+            [x - this.playerHalfWidth, z - this.playerHalfDepth], // bottom-left
+            [x + this.playerHalfWidth, z - this.playerHalfDepth], // bottom-right
+            [x - this.playerHalfWidth, z + this.playerHalfDepth], // top-left
+            [x + this.playerHalfWidth, z + this.playerHalfDepth], // top-right
+            [x, z] // center
+        ];
+        
+        let maxSurfaceY = -Infinity;
+        let closestCollisionMesh = null;
+        
+        testPoints.forEach(([testX, testZ]) => {
+            const start = new THREE.Vector3(testX, 1000000, testZ);
+            raycaster.set(start, direction);
+            const intersects = raycaster.intersectObjects(meshesToTest);
+            
+            if (intersects.length > 0) {
+                const surfaceY = intersects[0].point.y;
+                if (surfaceY > maxSurfaceY) {
+                    maxSurfaceY = surfaceY;
+                    closestCollisionMesh = intersects[0].object;
+                }
+            }
+        });
+        
+        this.currentCollisionMesh = closestCollisionMesh;
+        return maxSurfaceY !== -Infinity ? maxSurfaceY : undefined;
     }
 
     logTextures(mesh) {
