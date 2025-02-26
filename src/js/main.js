@@ -22,11 +22,14 @@ class GameEngine {
         this.gravity = -50000; // Increased from -9.8 to -25 (much stronger pull)
         this.velocityY = 0;
         this.isGrounded = false;
-        this.movementSpeedMultiplier = 1.6; // 1.6x speed boost
+        this.movementSpeedMultiplier = 3; // 1.6x speed boost
         this.maxRadius = 1000000;  // Increased from 100,000 to 1,000,000
         this.coordDisplay = this.createCoordinateDisplay();
         this.currentCollisionMesh = null;
         this.currentGroundMesh = null;
+        this.jumpVelocity = 25000; // Initial upward velocity when jumping
+        this.canJump = true; // Flag to prevent double-jumping
+        this.starRotationSpeed = 1.5; // radians per second
     }
 
     async init() {
@@ -54,13 +57,14 @@ class GameEngine {
         // Load both models
         try {
             console.log('Starting model load...');
-            const [baseModel, newModel] = await Promise.all([
-                this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/16064_autosave222.glb`),
-                this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/newproject.glb`)
+            const [baseModel, newModel, chestModel] = await Promise.all([
+                this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/juegomapa2.glb`),
+                this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/newproject.glb`),
+                this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/chest.glb`)
             ]);
             
-            console.log('Both models loaded successfully');
-            this.setupScene(baseModel.scene, newModel.scene);
+            console.log('All models loaded successfully');
+            this.setupScene(baseModel.scene, newModel.scene, chestModel.scene);
             this.hideLoadingScreen();
             this.animate();
         } catch (error) {
@@ -81,15 +85,13 @@ class GameEngine {
         gui.add(this, 'movementSpeedMultiplier', 0.5, 30.0).name('Speed Multiplier');
     }
 
-    setupScene(baseModel, newModel) {
-        // Clear previous scene
-        while(this.scene.children.length > 0) { 
-            this.scene.remove(this.scene.children[0]); 
-        }
-
+    setupScene(baseModel, newModel, chestModel) {
+        // Replace problematic scene clearing with safer method
+        this.scene.clear();  // Use Three.js's built-in clear method instead of manual removal
+        
         // Configure base model (mapita.glb)
         this.baseModel = baseModel;
-        baseModel.scale.set(30, 30, 30);
+        baseModel.scale.set(300, 300, 300);
         baseModel.position.set(0, -5, 0);
         baseModel.rotation.set(0, Math.PI/4, 0);
 
@@ -115,56 +117,93 @@ class GameEngine {
             return;
         }
 
-        //Get Cone position
-        let coneMesh;
-        baseModel.traverse(child => {
-            if (child.isMesh && child.name === "Cone") {
-                coneMesh = child;
-                return;  // Exit traversal after finding
-            }
-        });
-
-        if (!coneMesh) {
-            console.error('Cone mesh not found!');
-            console.log('Available meshes:');
-            baseModel.traverse(child => {
-                if (child.isMesh) console.log('-', child.name);
-            });
-            return;
-        }
-
         // Get plane's world position and dimensions
         const planePosition = new THREE.Vector3();
         planeMesh.getWorldPosition(planePosition);
         const planeBBox = new THREE.Box3().setFromObject(planeMesh);
         const planeHeight = planeBBox.max.y - planeBBox.min.y;
 
-        //Get Cone's world position and dimensions
-        const conePosition = new THREE.Vector3();
-        planeMesh.getWorldPosition(conePosition);
-        const coneBBox = new THREE.Box3().setFromObject(coneMesh);
-        const coneHeight = coneBBox.max.y - coneBBox.min.y;
-
         // Position new model (modified Y position)
         this.newModel = newModel;
         newModel.scale.set(90, 90, 90);
         newModel.position.set(
             planePosition.x - 18000,
-            planePosition.y + planeHeight - 35000,
+            planePosition.y + planeHeight - 36500,
             planePosition.z + 15000
         );
         
         // Store original position as offset
         this.coordinateOffset = new THREE.Vector3().copy(newModel.position);
 
-        // Add both models to scene
-        this.scene.add(baseModel, newModel);
+        // Position chest using the same coordinate system as other models
+        this.chestModel = chestModel
+        chestModel.scale.set(150, 150, 150)
+        chestModel.position.set(
+            planePosition.x - 50000,
+            planePosition.y + planeHeight - 36675,
+            planePosition.z + 12000
+        );
+        chestModel.rotation.y = -Math.PI/3
 
-        // Remove existing lights
+        // Create star shape above chest
+        const starShape = new THREE.Shape();
+        const points = 5;
+        const innerRadius = 20;
+        const outerRadius = 40;
+
+        starShape.moveTo(outerRadius, 0);
+        for(let i = 0; i < 2 * points; i++) {
+            const angle = (i * Math.PI) / points;
+            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+            starShape.lineTo(
+                Math.cos(angle) * radius,
+                Math.sin(angle) * radius
+            );
+        }
+        starShape.closePath();
+
+        const extrudeSettings = {
+            depth: 1,
+            bevelEnabled: true,
+            bevelSegments: 2,
+            steps: 2,
+            bevelSize: 5,
+            bevelThickness: 5
+        };
+
+        const starGeometry = new THREE.ExtrudeGeometry(starShape, extrudeSettings);
+        const starMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xFFFF00,
+            specular: 0x111111,
+            shininess: 1000
+        });
+        this.starMesh = new THREE.Mesh(starGeometry, starMaterial);
+
+        // Position star above chest
+        this.starMesh.scale.set(2, 2, 2)
+        this.starMesh.position.copy(chestModel.position);
+        this.starMesh.position.y += 300; // Adjust this value to change height
+        this.starMesh.position.z -= 100;
+        //starMesh.rotation.x = -Math.PI/2; // Rotate to face camera
+        this.starMesh.rotation.y = -Math.PI/4;
+
+        // Add star to scene
+        this.scene.add(this.starMesh);
+
+        // Add all models to scene
+        this.scene.add(baseModel, newModel, chestModel);
+
+        // Remove existing lights - fix traversal issue
+        const lightsToRemove = [];
         this.scene.traverse(child => {
             if (child.isLight) {
-                this.scene.remove(child);
+                lightsToRemove.push(child);
             }
+        });
+
+        // Remove collected lights after traversal
+        lightsToRemove.forEach(light => {
+            this.scene.remove(light);
         });
 
         // Add shadow-friendly lights
@@ -278,13 +317,13 @@ class GameEngine {
         if (this.keys['arrowleft']) this.theta += rotationAmount;
         if (this.keys['arrowup']) this.phi = THREE.MathUtils.clamp(
             this.phi + rotationAmount,
-            -Math.PI/2,
-            Math.PI/2
+            -Math.PI/4,
+            Math.PI/4
         );
         if (this.keys['arrowdown']) this.phi = THREE.MathUtils.clamp(
             this.phi - rotationAmount,
-            -Math.PI/2,
-            Math.PI/2
+            -Math.PI/25,
+            Math.PI/25
         );
     }
 
@@ -293,6 +332,18 @@ class GameEngine {
 
         const moveSpeed = 800 * this.movementSpeedMultiplier * deltaTime;
         
+        // Handle jumping with spacebar
+        if (this.keys[' '] && this.isGrounded && this.canJump) {
+            this.velocityY = this.jumpVelocity;
+            this.isGrounded = false;
+            this.canJump = false;
+        }
+        
+        // Reset ability to jump when grounded
+        if (this.isGrounded) {
+            this.canJump = true;
+        }
+
         // Get camera's forward direction (always where the camera is pointing)
         const cameraForward = new THREE.Vector3();
         this.camera.getWorldDirection(cameraForward);
@@ -348,22 +399,29 @@ class GameEngine {
                         collisionDetected = true;
                     }
                     else if (intersect.object.name === 'Cone002') {
-                        // Get Cone002's world position and bounding box
-                        const cone = intersect.object;
-                        cone.updateMatrixWorld(true);
-                        const bbox = new THREE.Box3().setFromObject(cone);
+                        // Generate random number (1 or 2)
+                        const randomChance = Math.floor(Math.random() * 2) + 1;
                         
-                        // Teleport to top of cone
-                        this.newModel.position.set(
-                            cone.position.x,
-                            bbox.max.y + this.playerHeight/2,  // Stand on top
-                            cone.position.z
-                        );
-                        
-                        // Reset vertical velocity
-                        this.velocityY = 0;
-                        this.isGrounded = true;
-                        this.currentCollisionMesh = cone;
+                        // Only teleport if random number is 1
+                        if (randomChance === 1) {
+                            // Get Cone002's world position and bounding box
+                            const cone = intersect.object;
+                            cone.updateMatrixWorld(true);
+                            const bbox = new THREE.Box3().setFromObject(cone);
+                            
+                            // Teleport to top of cone
+                            this.newModel.position.set(
+                                cone.position.x,
+                                bbox.max.y + this.playerHeight/2,  // Stand on top
+                                cone.position.z
+                            );
+                            
+                            // Reset vertical velocity
+                            this.velocityY = 0;
+                            this.isGrounded = true;
+                            this.currentCollisionMesh = cone;
+                        }
+                        // If random number is 2, do nothing (pass through)
                     }
                     else if (intersect.object.name === 'Cube004' && this.newModel.position.y < -1575) {
                         // Clamp Y position to -1575 but allow X/Z movement
@@ -383,7 +441,7 @@ class GameEngine {
             this.isGrounded = true;
         }
 
-        if (this.isGrounded && this.newModel.position.y == -3000) {
+        if (this.isGrounded && this.newModel.position.y == -3675.4) {
                 // Clamp Y position to -1575 but allow X/Z movement
                 this.newModel.position.y = -1575;
                 this.velocityY = 0;
@@ -471,7 +529,7 @@ class GameEngine {
 
     animate() {
         let lastTime = performance.now();
-        let maxDelta = 1/30; // Max 30ms frame time (≈33ms per frame)
+        let maxDelta = 1/30;
         
         const animateFrame = (now) => {
             requestAnimationFrame(animateFrame);
@@ -481,6 +539,11 @@ class GameEngine {
 
             // Prevent physics explosions when tab is backgrounded
             deltaTime = Math.min(deltaTime, maxDelta);
+
+            // Add star rotation
+            if (this.starMesh) {
+                this.starMesh.rotation.y += this.starRotationSpeed * deltaTime;
+            }
 
             this.handleCameraRotation(deltaTime);
             this.handleMovement(deltaTime);
