@@ -30,6 +30,8 @@ class GameEngine {
         this.jumpVelocity = 25000; // Initial upward velocity when jumping
         this.canJump = true; // Flag to prevent double-jumping
         this.starRotationSpeed = 1.5; // radians per second
+        this.freezeMovement = false; // Add this flag
+        this.chestMessage = this.createChestMessage(); // Add chest message element
     }
 
     async init() {
@@ -58,7 +60,7 @@ class GameEngine {
         try {
             console.log('Starting model load...');
             const [baseModel, newModel, chestModel] = await Promise.all([
-                this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/juegomapa2.glb`),
+                this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/16064_autosave222.glb`),
                 this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/newproject.glb`),
                 this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/chest.glb`)
             ]);
@@ -91,7 +93,7 @@ class GameEngine {
         
         // Configure base model (mapita.glb)
         this.baseModel = baseModel;
-        baseModel.scale.set(300, 300, 300);
+        baseModel.scale.set(30, 30, 30);
         baseModel.position.set(0, -5, 0);
         baseModel.rotation.set(0, Math.PI/4, 0);
 
@@ -143,7 +145,7 @@ class GameEngine {
             planePosition.y + planeHeight - 36675,
             planePosition.z + 12000
         );
-        chestModel.rotation.y = -Math.PI/3
+        chestModel.rotation.y = -Math.PI/6
 
         // Create star shape above chest
         const starShape = new THREE.Shape();
@@ -180,9 +182,9 @@ class GameEngine {
         this.starMesh = new THREE.Mesh(starGeometry, starMaterial);
 
         // Position star above chest
-        this.starMesh.scale.set(2, 2, 2)
+        this.starMesh.scale.set(4, 4, 4)
         this.starMesh.position.copy(chestModel.position);
-        this.starMesh.position.y += 300; // Adjust this value to change height
+        this.starMesh.position.y += 500; // Adjust this value to change height
         this.starMesh.position.z -= 100;
         //starMesh.rotation.x = -Math.PI/2; // Rotate to face camera
         this.starMesh.rotation.y = -Math.PI/4;
@@ -242,6 +244,12 @@ class GameEngine {
         // Add lights to scene
         this.scene.add(ambientLight, directionalLight);
 
+        // Create and position point light at star's location
+        this.starLight = new THREE.PointLight(0xffc45d, 10.0, 10000, 2);
+        this.starLight.position.copy(this.starMesh.position);
+        this.starLight.castShadow = true;
+        this.scene.add(this.starLight);
+
         // Enable shadow map in renderer
         this.renderer.instance.shadowMap.enabled = true;
         this.renderer.instance.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -286,6 +294,13 @@ class GameEngine {
         this.playerHalfWidth = (playerBBox.max.x - playerBBox.min.x) / 2;
         this.playerHalfDepth = (playerBBox.max.z - playerBBox.min.z) / 2;
         console.log('Calculated player dimensions:', this.playerHeight, this.playerHalfWidth, this.playerHalfDepth);
+
+        // Store Cone reference
+        baseModel.traverse(child => {
+            if (child.isMesh && child.name === "Cone") {
+                this.coneMesh = child;
+            }
+        });
     }
 
     getModelBoundingBox(model) {
@@ -303,6 +318,20 @@ class GameEngine {
     setupKeyboardControls() {
         window.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
+            
+            // Add Q key handling
+            if (e.key.toLowerCase() === 'q' && this.freezeMovement) {
+                this.freezeMovement = false;
+                this.chestMessage.style.display = 'none';
+                
+                // Move player back 100 units in camera direction
+                const cameraForward = new THREE.Vector3();
+                this.camera.getWorldDirection(cameraForward);
+                const backwardVector = cameraForward.multiplyScalar(-100);
+                this.newModel.position.add(backwardVector);
+                
+                this.coordDisplay.style.display = 'block';
+            }
         });
 
         window.addEventListener('keyup', (e) => {
@@ -311,6 +340,7 @@ class GameEngine {
     }
 
     handleCameraRotation(deltaTime) {
+        if (this.freezeMovement) return; // Prevent camera movement when frozen
         const rotationAmount = this.cameraRotateSpeed * deltaTime;
         
         if (this.keys['arrowright']) this.theta -= rotationAmount;
@@ -328,6 +358,7 @@ class GameEngine {
     }
 
     handleMovement(deltaTime) {
+        if (this.freezeMovement) return; // Prevent movement when frozen
         if (!this.newModel || !this.planeMesh) return;
 
         const moveSpeed = 800 * this.movementSpeedMultiplier * deltaTime;
@@ -378,9 +409,9 @@ class GameEngine {
         // List of meshes that trigger player reset (remove Cone002)
         const resetMeshes = [
             'Cube001', 'Cube002', 'Cube003', 'Cube005', 'Cube006',
-            'Cone', 'Cone001',  // Removed Cone002 from reset list
+            'Cone001',
             'images', 'images001', 'images002', 'images003', 'images004', 'images005',
-            'Sphere', 'Sphere001',
+            'Sphere001', 'Sphere002',
             'Cylinder', 'Cylinder001'
         ];
 
@@ -422,6 +453,28 @@ class GameEngine {
                             this.currentCollisionMesh = cone;
                         }
                         // If random number is 2, do nothing (pass through)
+                    }
+                    else if (intersect.object.name === 'Sphere') {
+                        // Find Cone mesh in the scene
+                        let coneMesh;
+                        this.scene.traverse(child => {
+                            if (child.isMesh && child.name === 'Cone') {
+                                coneMesh = child;
+                            }
+                        });
+                        
+                        if (coneMesh) {
+                            coneMesh.updateMatrixWorld(true);
+                            const bbox = new THREE.Box3().setFromObject(coneMesh);
+                            this.newModel.position.set(
+                                coneMesh.position.x - 10000,
+                                bbox.max.y + this.playerHeight/2,
+                                coneMesh.position.z + 15000
+                            );
+                            this.velocityY = 0;
+                            this.isGrounded = true;
+                            this.currentCollisionMesh = coneMesh;
+                        }
                     }
                     else if (intersect.object.name === 'Cube004' && this.newModel.position.y < -1575) {
                         // Clamp Y position to -1575 but allow X/Z movement
@@ -525,6 +578,14 @@ class GameEngine {
 
         // Update camera focus (maintain relative position)
         this.modelCenter.copy(this.newModel.position);
+
+        // Add chest proximity check at the end of handleMovement
+        const distanceToChest = this.newModel.position.distanceTo(this.chestModel.position);
+        if (distanceToChest < 1000 && !this.freezeMovement) {
+            this.freezeMovement = true;
+            this.chestMessage.style.display = 'block';
+            this.coordDisplay.style.display = 'none'; // Hide coordinate display
+        }
     }
 
     animate() {
@@ -600,6 +661,28 @@ class GameEngine {
             border-radius: 4px;
             z-index: 1000;
         `;
+        document.body.appendChild(div);
+        return div;
+    }
+
+    createChestMessage() {
+        const div = document.createElement('div');
+        div.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 2em;
+            text-align: center;
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1001;
+        `;
+        div.textContent = "Wow! A chest! I wonder what's inside";
         document.body.appendChild(div);
         return div;
     }
