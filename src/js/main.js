@@ -19,7 +19,7 @@ class GameEngine {
         this.crosshair.style.display = 'none'; // Hide crosshair
         document.body.style.cursor = 'default'; // Restore cursor
         this.planeMesh = null; // Store reference to Plane001
-        this.gravity = -50000; // Increased from -9.8 to -25 (much stronger pull)
+        this.gravity = -50000; // Reduced from -50000 (weaker gravity for slower fall)
         this.velocityY = 0;
         this.isGrounded = false;
         this.movementSpeedMultiplier = 3; // 1.6x speed boost
@@ -27,11 +27,14 @@ class GameEngine {
         this.coordDisplay = this.createCoordinateDisplay();
         this.currentCollisionMesh = null;
         this.currentGroundMesh = null;
-        this.jumpVelocity = 25000; // Initial upward velocity when jumping
+        this.jumpVelocity = 30000; // Increased from 25000 (higher initial jump)
         this.canJump = true; // Flag to prevent double-jumping
         this.starRotationSpeed = 1.5; // radians per second
         this.freezeMovement = false; // Add this flag
         this.chestMessage = this.createChestMessage(); // Add chest message element
+        this.isJumping = false;
+        this.jumpStartTime = 0;
+        this.jumpDuration = 1; // seconds for full jump cycle
     }
 
     async init() {
@@ -191,6 +194,13 @@ class GameEngine {
 
         // Add star to scene
         this.scene.add(this.starMesh);
+
+        // Add black cube at specified position
+        const cubeGeometry = new THREE.BoxGeometry(250, 250, 250);
+        const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cubeMesh.position.set(-5303, -5257, 3515); // Add 250 to Y to account for cube center
+        this.scene.add(cubeMesh);
 
         // Add all models to scene
         this.scene.add(baseModel, newModel, chestModel);
@@ -358,21 +368,34 @@ class GameEngine {
     }
 
     handleMovement(deltaTime) {
-        if (this.freezeMovement) return; // Prevent movement when frozen
+        if (this.freezeMovement) return;
         if (!this.newModel || !this.planeMesh) return;
 
         const moveSpeed = 800 * this.movementSpeedMultiplier * deltaTime;
         
         // Handle jumping with spacebar
-        if (this.keys[' '] && this.isGrounded && this.canJump) {
-            this.velocityY = this.jumpVelocity;
+        if (this.keys[' '] && this.isGrounded && !this.isJumping) {
+            this.isJumping = true;
+            this.jumpStartTime = performance.now();
+            this.initialY = this.newModel.position.y;
             this.isGrounded = false;
-            this.canJump = false;
         }
-        
-        // Reset ability to jump when grounded
-        if (this.isGrounded) {
-            this.canJump = true;
+
+        // Jump animation handling
+        if (this.isJumping) {
+            const elapsed = (performance.now() - this.jumpStartTime) / 1000;
+            const progress = elapsed / this.jumpDuration;
+            
+            if (progress < 1) {
+                // Parabolic jump curve (up then down)
+                const jumpHeight = 1000;
+                const yPos = this.initialY + jumpHeight * Math.sin(progress * Math.PI);
+                this.newModel.position.y = yPos;
+            } else {
+                // End of jump cycle
+                this.isJumping = false;
+                this.isGrounded = true;
+            }
         }
 
         // Get camera's forward direction (always where the camera is pointing)
@@ -509,49 +532,40 @@ class GameEngine {
             this.isGrounded = true;
         }
 
-        // Enhanced vertical collision detection
-        const meshesToTest = [];
-        this.scene.traverse(child => {
-            if (child.isMesh && !child.name.toLowerCase().includes('image')) {
-                meshesToTest.push(child);
-            }
-        });
-
-        // Vertical collision check covering full player height
-        const playerTop = this.newModel.position.y + this.playerHeight/2;
-        const playerBottom = this.newModel.position.y - this.playerHeight/2;
-        
-        // Check vertical collisions first
-        const verticalRaycaster = new THREE.Raycaster(
-            new THREE.Vector3(this.newModel.position.x, playerTop, this.newModel.position.z),
-            new THREE.Vector3(0, -1, 0),
-            0,
-            this.playerHeight // Check through entire player height
-        );
-        
-        const verticalHit = verticalRaycaster.intersectObjects(meshesToTest)[0];
-        if (verticalHit) {
-            // Calculate surface position based on hit point
-            const surfaceY = verticalHit.point.y;
+        // Skip vertical collision check during jump
+        if (!this.isJumping) {
+            // Vertical collision check covering full player height
+            const verticalRaycaster = new THREE.Raycaster(
+                new THREE.Vector3(this.newModel.position.x, this.newModel.position.y + this.playerHeight/2, this.newModel.position.z),
+                new THREE.Vector3(0, -1, 0),
+                0,
+                this.playerHeight
+            );
             
-            if (this.velocityY < 0) { // Moving downward
-                // Position player on top of surface with full height
-                this.newModel.position.y = surfaceY + this.playerHeight/2;
-                this.velocityY = 0;
-                this.isGrounded = true;
-                this.currentCollisionMesh = verticalHit.object;
-            } else if (this.velocityY > 0) { // Moving upward
-                // Position player below ceiling
-                this.newModel.position.y = surfaceY - this.playerHeight/2 - 1;
-                this.velocityY = 0;
+            const verticalHit = verticalRaycaster.intersectObjects(this.scene.children, true)[0];
+            if (verticalHit) {
+                // Calculate surface position based on hit point
+                const surfaceY = verticalHit.point.y;
+                
+                if (this.velocityY < 0) { // Moving downward
+                    // Position player on top of surface with full height
+                    this.newModel.position.y = surfaceY + this.playerHeight/2;
+                    this.velocityY = 0;
+                    this.isGrounded = true;
+                    this.currentCollisionMesh = verticalHit.object;
+                } else if (this.velocityY > 0) { // Moving upward
+                    // Position player below ceiling
+                    this.newModel.position.y = surfaceY - this.playerHeight/2 - 1;
+                    this.velocityY = 0;
+                }
+            } else {
+                this.isGrounded = false;
+                this.currentCollisionMesh = null;
             }
-        } else {
-            this.isGrounded = false;
-            this.currentCollisionMesh = null;
         }
 
-        // Apply gravity only if not grounded
-        if (!this.isGrounded) {
+        // Apply gravity only if not grounded AND not jumping
+        if (!this.isGrounded && !this.isJumping) {
             this.velocityY += this.gravity * deltaTime;
             this.newModel.position.y += this.velocityY * deltaTime;
         }
