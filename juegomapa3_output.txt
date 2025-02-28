@@ -1,0 +1,62 @@
+### MESHES
+| #   | Name         | Mode      | Mesh Primitives | GL Primitives | Vertices  | Indices | Attributes                                | Instances | Size¹      |
+| --- | ----------- | --------- | --------------- | ------------- | ----------| ------- | ----------------------------------------- | --------- | ---------- |
+| 0   | Cube.002    | TRIANGLES | 1               | 880           | 934       | u16     | NORMAL:f32, POSITION:f32                 | 1         | 27.7 KB    |
+| 1   | Cube.005    | TRIANGLES | 1               | 646           | 1,012     | u16     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 36.26 KB   |
+| 2   | Cone        | TRIANGLES | 1               | 32            | 33        | u16     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 1.25 KB    |
+| 3   | Cone.001    | TRIANGLES | 1               | 30            | 90        | u16     | NORMAL:f32, POSITION:f32                 | 1         | 2.34 KB    |
+| 4   | Sphere      | TRIANGLES | 1               | 960           | 596       | u16     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 24.83 KB   |
+| 5   | Cone.002    | TRIANGLES | 1               | 137,312       | 71,749    | u32     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 3.94 MB    |
+| 6   | Sphere.001  | TRIANGLES | 1               | 6,720         | 3,913     | u16     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 165.54 KB  |
+| 7   | Plane.001   | TRIANGLES | 1               | 47            | 131       | u16     | NORMAL:f32, POSITION:f32                 | 1         | 3.43 KB    |
+| 8   | Cylinder.002| TRIANGLES | 1               | 124           | 218       | u16     | NORMAL:f32, POSITION:f32                 | 1         | 5.98 KB    |
+| 9   | Cube.010    | TRIANGLES | 1               | 196,608       | 99,838    | u32     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 5.55 MB    |
+| 10  | New Project | TRIANGLES | 1               | 2             | 4         | u16     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 140 Bytes  |
+| 11  | Sphere.003  | TRIANGLES | 1               | 960           | 2,878     | u16     | NORMAL:f32, POSITION:f32                 | 1         | 74.83 KB   |
+| 12  | Cube        | TRIANGLES | 1               | 1,470         | 2,940     | u16     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 102.9 KB   |
+| 13  | Cube.003    | TRIANGLES | 1               | 1,168         | 731       | u16     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 30.4 KB    |
+| 14  | images      | TRIANGLES | 1               | 12            | 24        | u16     | NORMAL:f32, POSITION:f32, TEXCOORD_0:f32 | 1         | 840 Bytes  |
+
+
+
+MATERIALS
+ ────────────────────────────────────────────
+| #   | name         | instances | textures                        | alphaMode | doubleSided |
+| --- | ---          | ---       | ---                             | ---       | ---         |
+| 0   | Material.015 | 1         |                                 | OPAQUE    | ✓           |
+| 1   | Material.024 | 1         |                                 | OPAQUE    | ✓           |
+| 2   | Material.025 | 1         |                                 | OPAQUE    | ✓           |
+| 3   | images       | 1         | emissiveTexture                 | OPAQUE    | ✓           |
+| 4   | Material.026 | 1         | baseColorTexture, normalTexture | OPAQUE    | ✓           |
+| 5   | Material.027 | 1         | baseColorTexture, normalTexture | OPAQUE    | ✓           |
+| 6   | Material.028 | 1         | baseColorTexture                | OPAQUE    | ✓           |
+| 7   | Material.029 | 1         |                                 | BLEND     | ✓           |
+| 8   | Material.030 | 1         |                                 | OPAQUE    | ✓           |
+| 9   | Material.031 | 1         | baseColorTexture, normalTexture | OPAQUE    | ✓           |
+| 10  | New Project  | 1         | baseColorTexture                | BLEND     | ✓           |
+| 11  | Material.032 | 1         |                                 | OPAQUE    | ✓           |
+| 12  | Material     | 1         | baseColorTexture, normalTexture | OPAQUE    | ✓           |
+| 13  | Material.003 | 1         | baseColorTexture, normalTexture | OPAQUE    | ✓           |
+
+
+
+ TEXTURES
+ ────────────────────────────────────────────
+| #   | name             | uri | slots            | instances | mimeType   | compression | resolution | size      | gpuSize⁵ |
+| --- | ---              | --- | ---              | ---       | ---        | ---         | ---        | ---       | ---      |   
+| 0   | Image_1          |     | emissiveTexture  | 1         | image/webp |             | 512x512    | 3.72 KB   | 1.4 MB   |   
+| 1   | Image_2          |     | normalTexture    | 1         | image/jpeg |             | 1024x1024  | 162.25 KB | 5.59 MB  |   
+| 2   | colorsillos      |     | baseColorTexture | 1         | image/webp |             | 1024x1024  | 59.14 KB  | 5.59 MB  |   
+| 3   | Image_5          |     | normalTexture    | 1         | image/jpeg |             | 1024x1024  | 52.66 KB  | 5.59 MB  |   
+| 4   | Image_4          |     | baseColorTexture | 1         | image/webp |             | 1024x1024  | 13 KB     | 5.59 MB  |   
+| 5   | Image_7          |     | baseColorTexture | 1         | image/webp |             | 1024x1024  | 9.09 KB   | 5.59 MB  |   
+| 6   | Image_8          |     | normalTexture    | 1         | image/jpeg |             | 512x512    | 14.34 KB  | 1.4 MB   |   
+| 7   | Image_28         |     | baseColorTexture | 1         | image/webp |             | 512x512    | 3.64 KB   | 1.4 MB   |   
+| 8   | Image_9          |     | baseColorTexture | 1         | image/webp |             | 1024x1024  | 51.89 KB  | 5.59 MB  |   
+| 9   | tierra           |     | normalTexture    | 1         | image/jpeg |             | 512x512    | 3.7 KB    | 1.4 MB   |   
+| 10  | tierra           |     | baseColorTexture | 1         | image/webp |             | 512x512    | 5.36 KB   | 1.4 MB   |   
+| 11  | pasto por encima |     | normalTexture    | 1         | image/jpeg |             | 1024x1024  | 10.38 KB  | 5.59 MB  |   
+| 12  | pasto por encima |     | baseColorTexture | 1         | image/webp |             | 1024x1024  | 5.47 KB   | 5.59 MB  |   
+
+⁵ gpuSize estimates minimum VRAM memory allocation. Older devices may require
+  additional memory for GPU compression formats.
