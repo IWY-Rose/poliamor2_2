@@ -3,13 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance-Optimized 3D Game</title>
-    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.18.2/dist/lil-gui.umd.min.js"></script>
+    <title>Welcome</title>
     <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <div id="loading-screen">Loading...</div>
-    <canvas id="gameCanvas"></canvas>
-    <script type="module" src="/src/js/main.js"></script>
+    <h1>Welcome to the most bugged game yet! Click below to play</h1>
+    <a href="/src/js/main.js">Play Game</a>
 </body>
-</html> 
+</html>
