@@ -1,0 +1,1014 @@
+import * as THREE from 'three';
+import { Renderer } from './core/Renderer.js';
+import { AssetLoader } from './core/AssetLoader.js';
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
+
+// Core system classes
+class InputController {
+  constructor() {
+    this.keys = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+      space: false,
+      shift: false,
+      quit: false
+    };
+    this.cameraRotation = {
+      left: false,
+      right: false,
+      up: false,
+      down: false
+    };
+    this._Initialize();
+  }
+
+  _Initialize() {
+    document.addEventListener('keydown', (e) => this._onKeyDown(e), false);
+    document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
+  }
+
+  _onKeyDown(event) {
+    switch(event.key.toLowerCase()) {
+      case 's': this.keys.forward = true; break;
+      case 'd': this.keys.left = true; break;
+      case 'w': this.keys.backward = true; break;
+      case 'a': this.keys.right = true; break;
+      case ' ': this.keys.space = true; break;
+      case 'shift': this.keys.shift = true; break;
+      case 'q': this.keys.quit = true; break;
+      case 'arrowright': this.cameraRotation.left = true; break;
+      case 'arrowleft': this.cameraRotation.right = true; break;
+      case 'arrowup': this.cameraRotation.up = true; break;
+      case 'arrowdown': this.cameraRotation.down = true; break;
+    }
+  }
+
+  _onKeyUp(event) {
+    switch(event.key.toLowerCase()) {
+      case 's': this.keys.forward = false; break;
+      case 'd': this.keys.left = false; break;
+      case 'w': this.keys.backward = false; break;
+      case 'a': this.keys.right = false; break;
+      case ' ': this.keys.space = false; break;
+      case 'shift': this.keys.shift = false; break;
+      case 'q': this.keys.quit = false; break;
+      case 'arrowright': this.cameraRotation.left = false; break;
+      case 'arrowleft': this.cameraRotation.right = false; break;
+      case 'arrowup': this.cameraRotation.up = false; break;
+      case 'arrowdown': this.cameraRotation.down = false; break;
+    }
+  }
+}
+
+class ThirdPersonCamera {
+  constructor(params) {
+    this.params = params;
+    this.camera = params.camera;
+    this.target = params.target;
+    
+    this.currentPosition = new THREE.Vector3();
+    this.currentLookAt = new THREE.Vector3();
+    
+    // Camera configuration
+    this.phi = params.phi || 0;           // Vertical rotation
+    this.theta = params.theta || 0;       // Horizontal rotation
+    
+    this.radius = params.radius || 350;   // Distance from target
+    // Define a base look-at offset (e.g., slightly above the target's feet)
+    this.baseLookAtOffset = new THREE.Vector3(0, 50, 0); // Adjust Y as needed
+    
+    // Camera rotation speed
+    this.rotationSpeed = params.cameraRotateSpeed || 1.5;
+    this.phiSpeed = params.cameraRotateSpeed || 1.5;
+    
+    // Camera constraints
+    this.phiClamp = {
+      min: -Math.PI / 10,  // Don't look too far down
+      max: Math.PI / 3     // Don't look too far up
+    };
+
+    // Initialize camera position
+    this._UpdateCamera();
+  }
+  
+  _CalculateIdealOffset() {
+    const offset = new THREE.Vector3();
+    
+    // Calculate offset based on spherical coordinates (radius, theta, phi)
+    // This determines the camera's position relative to the target
+    offset.x = this.radius * Math.sin(this.theta) * Math.cos(this.phi);
+    offset.y = this.radius * Math.sin(this.phi);
+    offset.z = this.radius * Math.cos(this.theta) * Math.cos(this.phi);
+    
+    return offset;
+  }
+  
+  _CalculateIdealLookat() {
+    // Calculate the look-at point slightly above the target's base position.
+    // This point remains fixed relative to the target, regardless of camera angle.
+    const idealLookat = this.baseLookAtOffset.clone();
+    idealLookat.add(this.target.position);
+    return idealLookat;
+
+    /* 
+    // Alternative: Make look-at point rotate with camera (like Simondev, but using theta)
+    // This might feel less stable depending on the desired effect.
+    const lookAtOffset = new THREE.Vector3(0, 50, 100); // Look slightly in front and above
+    const rotationY = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.theta);
+    lookAtOffset.applyQuaternion(rotationY);
+    lookAtOffset.add(this.target.position);
+    return lookAtOffset; 
+    */
+  }
+
+  _UpdateCamera() {
+    const idealOffset = this._CalculateIdealOffset();
+    const idealLookAt = this._CalculateIdealLookat();
+    
+    // Calculate the target camera position by adding the offset to the target's position
+    const idealPosition = new THREE.Vector3().addVectors(this.target.position, idealOffset);
+
+    this.currentPosition.copy(idealPosition);
+    this.currentLookAt.copy(idealLookAt);
+    
+    this.camera.position.copy(this.currentPosition);
+    this.camera.lookAt(this.currentLookAt);
+  }
+  
+  Update(timeElapsed, input) {
+    // Skip if freeze movement is enabled
+    if (this.params.freezeMovement) return this.theta;
+
+    // Rotate camera based on arrow keys
+    if (input.cameraRotation.left) {
+      this.theta += this.rotationSpeed * timeElapsed;
+    }
+    if (input.cameraRotation.right) {
+      this.theta -= this.rotationSpeed * timeElapsed;
+    }
+    if (input.cameraRotation.up) {
+      this.phi = Math.min(
+        this.phiClamp.max,
+        this.phi + this.phiSpeed * timeElapsed
+      );
+    }
+    if (input.cameraRotation.down) {
+      this.phi = Math.max(
+        this.phiClamp.min,
+        this.phi - this.phiSpeed * timeElapsed
+      );
+    }
+    
+    // Calculate ideal camera position and look-at point
+    const idealOffset = this._CalculateIdealOffset();
+    const idealLookAt = this._CalculateIdealLookat();
+    const idealPosition = new THREE.Vector3().addVectors(this.target.position, idealOffset);
+        
+    // Smoothly interpolate to ideal position and look-at
+    const t = 1.0 - Math.pow(0.001, timeElapsed); 
+    
+    this.currentPosition.lerp(idealPosition, t);
+    this.currentLookAt.lerp(idealLookAt, t);
+    
+    // Update camera
+    this.camera.position.copy(this.currentPosition);
+    this.camera.lookAt(this.currentLookAt);
+    
+    // Return current theta for player to match rotation
+    return this.theta;
+  }
+}
+
+class CharacterController {
+  constructor(params) {
+    this.params = params;
+    this.model = params.model;
+    this.scene = params.scene;
+    this.audioLoader = params.audioLoader;
+    this.listener = params.listener;
+    this.isMuted = params.isMuted;
+    this.coordinateOffset = params.coordinateOffset;
+    
+    // Physics settings
+    this.gravity = params.gravity || -50000;
+    this.velocityY = 0;
+    this.isGrounded = false;
+    this.hoverHeight = params.hoverHeight || 10;
+    
+    // Movement settings
+    this.movementSpeed = 800;
+    this.movementSpeedMultiplier = params.movementSpeedMultiplier || 3;
+    this.runMultiplier = 2.0;
+    
+    // Jumping
+    this.isJumping = false;
+    this.jumpStartTime = 0;
+    this.jumpDuration = 1.0; // seconds
+    this.initialJumpY = 0;
+    
+    // Player dimensions
+    this.playerHeight = params.playerHeight || 0;
+    this.playerHalfWidth = params.playerHalfWidth || 5;
+    this.playerHalfDepth = params.playerHalfDepth || 5;
+    
+    // Ground detection
+    this.raycaster = new THREE.Raycaster();
+    this.currentCollisionMesh = null;
+    
+    // Audio
+    this.setupAudio();
+    
+    // Walking state
+    this.isWalking = false;
+  }
+  
+  setupAudio() {
+    if (!this.audioLoader || !this.listener) return;
+    
+    // Initialize audio components
+    this.walkSound = this.params.walkSound || new THREE.Audio(this.listener);
+    this.jumpSound = this.params.jumpSound || new THREE.Audio(this.listener);
+    
+    // Configure existing sounds if already loaded
+    if (this.walkSound && !this.walkSound.buffer && this.audioLoader) {
+      this.audioLoader.load(
+        `${import.meta.env.BASE_URL}audio/caminata.mp3`,
+        (buffer) => {
+          this.walkSound.setBuffer(buffer);
+          this.walkSound.setLoop(true);
+          this.walkSound.setVolume(this.isMuted ? 0 : 10);
+        }
+      );
+    }
+    
+    if (this.jumpSound && !this.jumpSound.buffer && this.audioLoader) {
+      this.audioLoader.load(
+        `${import.meta.env.BASE_URL}audio/salto.mp3`,
+        (buffer) => {
+          this.jumpSound.setBuffer(buffer);
+          this.jumpSound.setVolume(this.isMuted ? 0 : 0.5);
+        }
+      );
+    }
+  }
+  
+  _HandleJump(timeElapsed, input) {
+    if (input.keys.space && this.isGrounded && !this.isJumping) {
+      // Start jump
+      this.isJumping = true;
+      this.jumpStartTime = performance.now();
+      this.initialJumpY = this.model.position.y;
+      this.isGrounded = false;
+      
+      // Play jump sound
+      if (!this.isMuted && this.jumpSound) {
+        if (this.jumpSound.isPlaying) {
+          this.jumpSound.stop();
+        }
+        this.jumpSound.play();
+      }
+    }
+    
+    // Handle jump animation
+    if (this.isJumping) {
+      const elapsed = (performance.now() - this.jumpStartTime) / 1000;
+      const progress = elapsed / this.jumpDuration;
+      
+      if (progress < 1) {
+        // Parabolic jump path
+        const jumpHeight = 1000;
+        const yPos = this.initialJumpY + jumpHeight * Math.sin(progress * Math.PI);
+        this.model.position.y = yPos;
+      } else {
+        // End jump
+        this.isJumping = false;
+      }
+    }
+  }
+  
+  _CheckGrounded() {
+    if (!this.model) return false;
+    
+    // Cast rays down from the player position
+    const playerPos = this.model.position.clone();
+    const halfWidth = this.playerHalfWidth;
+    const halfDepth = this.playerHalfDepth;
+    
+    // Use multiple rays for better ground detection
+    const rayOriginYOffset = this.playerHeight * 0.6; 
+    const rayPoints = [
+      new THREE.Vector3(playerPos.x, playerPos.y + rayOriginYOffset, playerPos.z), // Center
+      new THREE.Vector3(playerPos.x + halfWidth, playerPos.y + rayOriginYOffset, playerPos.z + halfDepth), // Front-right
+      new THREE.Vector3(playerPos.x - halfWidth, playerPos.y + rayOriginYOffset, playerPos.z + halfDepth), // Front-left
+      new THREE.Vector3(playerPos.x + halfWidth, playerPos.y + rayOriginYOffset, playerPos.z - halfDepth), // Back-right
+      new THREE.Vector3(playerPos.x - halfWidth, playerPos.y + rayOriginYOffset, playerPos.z - halfDepth)  // Back-left
+    ];
+    
+    let highestY = -Infinity;
+    let hitObject = null;
+    
+    // Cast rays and find the highest ground point
+    for (const point of rayPoints) {
+      this.raycaster.set(point, new THREE.Vector3(0, -1, 0));
+      const objectsToCheck = this.scene.children.filter(obj => obj !== this.model); 
+      const hits = this.raycaster.intersectObjects(objectsToCheck, true); 
+      
+      if (hits.length > 0) {
+        const hit = hits[0];
+        if (hit.point.y > highestY + 0.1) { 
+          highestY = hit.point.y;
+          hitObject = hit.object;
+        }
+      }
+    }
+    
+    // Apply grounding if a surface was found
+    if (highestY !== -Infinity) {
+      // Set player's target Y position to the ground point plus the desired hover height.
+      const targetY = highestY + this.hoverHeight; 
+      
+      const groundSnapThreshold = 1.0; // Adjust as needed
+      
+      // Check if player is close enough to the target hover height
+      if (!this.isJumping && Math.abs(this.model.position.y - targetY) < groundSnapThreshold) {
+         // Close enough, consider grounded, reset vertical velocity if falling
+         this.isGrounded = true;
+         if (this.velocityY < 0) {
+           this.velocityY = 0; 
+         }
+         // Optionally smoothly adjust to targetY if needed, or just stop velocity
+         // this.model.position.y = targetY; // Hard snap (can cause jitter)
+      } else if (!this.isJumping && this.model.position.y > targetY && this.velocityY <= 0) {
+         // Falling onto the hover zone, snap to target Y and reset velocity
+         this.model.position.y = targetY;
+         this.velocityY = 0; 
+         this.isGrounded = true;
+      } else if (!this.isJumping && this.model.position.y < targetY) {
+          // Below hover height, might be on a slope or just landed, snap up
+          this.model.position.y = targetY;
+          this.velocityY = 0;
+          this.isGrounded = true;
+      } else {
+         // Jumping or too far above the hover height
+         this.isGrounded = false; 
+      }
+
+      this.currentCollisionMesh = hitObject;
+      return true;
+
+    } else {
+      this.isGrounded = false;
+      this.currentCollisionMesh = null;
+      return false;
+    }
+  }
+  
+  _ApplyGravity(timeElapsed) {
+    if (!this.isGrounded && !this.isJumping) {
+      this.velocityY += this.gravity * timeElapsed;
+      
+      // Limit fall speed
+      this.velocityY = Math.max(this.velocityY, -20000);
+      
+      // Apply gravity to Y position
+      this.model.position.y += this.velocityY * timeElapsed;
+      
+      // Reset if falls too far
+      if (this.model.position.y <= -16000 && this.coordinateOffset) {
+        this.model.position.copy(this.coordinateOffset);
+        this.velocityY = 0;
+        this.isGrounded = true;
+      }
+    }
+  }
+
+  _HandleMovement(timeElapsed, input, cameraTheta) {
+    if (!this.model) return;
+    
+    // Calculate movement direction vectors based on camera orientation
+    const forward = new THREE.Vector3(
+      Math.sin(cameraTheta), 0, Math.cos(cameraTheta));
+    const right = new THREE.Vector3(
+      Math.sin(cameraTheta + Math.PI/2), 0, Math.cos(cameraTheta + Math.PI/2));
+    
+    // Store original Y position - REMOVED, let gravity handle Y
+    // const originalY = this.model.position.y; 
+    
+    // Speed calculation
+    const speedMultiplier = input.keys.shift ? this.runMultiplier : 1.0;
+    const moveSpeed = this.movementSpeed * this.movementSpeedMultiplier * timeElapsed * speedMultiplier;
+    
+    // Apply movement based on input
+    let isMoving = false;
+    
+    if (input.keys.forward) {
+      this.model.position.x += forward.x * moveSpeed;
+      this.model.position.z += forward.z * moveSpeed;
+      isMoving = true;
+    }
+    
+    if (input.keys.backward) {
+      this.model.position.x -= forward.x * moveSpeed;
+      this.model.position.z -= forward.z * moveSpeed;
+      isMoving = true;
+    }
+    
+    if (input.keys.left) {
+      this.model.position.x += right.x * moveSpeed;
+      this.model.position.z += right.z * moveSpeed;
+      isMoving = true;
+    }
+    
+    if (input.keys.right) {
+      this.model.position.x -= right.x * moveSpeed;
+      this.model.position.z -= right.z * moveSpeed;
+      isMoving = true;
+    }
+    
+    // Rotate the character to face the camera direction when moving
+    if (isMoving) {
+      this.model.rotation.y = cameraTheta;
+    }
+    
+    // Preserve Y position during movement - REMOVED
+    // this.model.position.y = originalY; 
+    
+    // Handle walking sound
+    this._UpdateWalkingSound(isMoving);
+    
+    return isMoving;
+  }
+  
+  _UpdateWalkingSound(isMoving) {
+    if (!this.walkSound || this.isMuted) return;
+    
+    if (isMoving && this.isGrounded && !this.isWalking) {
+      this.isWalking = true;
+      if (!this.walkSound.isPlaying) {
+        this.walkSound.play();
+        this.walkSound.setVolume(10);
+      }
+    } else if ((!isMoving || !this.isGrounded) && this.isWalking) {
+      this.isWalking = false;
+      if (this.walkSound.isPlaying) {
+        this.walkSound.stop();
+      }
+    }
+  }
+  
+  Update(timeElapsed, input, cameraTheta) {
+    this._CheckGrounded();
+    this._HandleJump(timeElapsed, input);
+    const isMoving = this._HandleMovement(timeElapsed, input, cameraTheta);
+    
+    // Apply gravity if not jumping
+    if (!this.isJumping) {
+      this._ApplyGravity(timeElapsed);
+    }
+    
+    return {
+      isMoving: isMoving,
+      isGrounded: this.isGrounded,
+      position: this.model.position,
+      currentCollisionMesh: this.currentCollisionMesh
+    };
+  }
+}
+
+class Game {
+  constructor(muted = false) {
+    this.isMuted = muted;
+    this.initialized = false;
+    this.freezeMovement = false;
+    
+    // Setup basic properties
+    this.time = 0;
+    this.clock = new THREE.Clock();
+    
+    // Create the renderer
+    this.renderer = new Renderer();
+    
+    // Set up the scene
+    this.scene = new THREE.Scene();
+    
+    // Set up the camera
+    this.camera = new THREE.PerspectiveCamera(
+      45, 
+      window.innerWidth / window.innerHeight, 
+      0.1, 
+      5000000
+    );
+    
+    // Model center for camera tracking
+    this.modelCenter = new THREE.Vector3(0, -5, 0);
+    
+    // Audio setup
+    this.audioLoader = new THREE.AudioLoader();
+    this.listener = new THREE.AudioListener();
+    this.camera.add(this.listener);
+    
+    // Camera settings
+    this.theta = 0;
+    this.phi = 0;
+    this.radius = 350;
+    this.cameraRotateSpeed = 1.5;
+    
+    // UI elements
+    this.coordDisplay = this._createCoordinateDisplay();
+    this.chestMessage = this._createChestMessage();
+    
+    // Load models and initialize the game
+    this._loadModels().then(() => {
+      this._setupInput();
+      this._initializeCharacterController();
+      this._initializeCamera();
+      this._setupAudio();
+      this._setupGUI();
+      
+      this.initialized = true;
+      this._startGameLoop();
+    });
+    
+    // Handle window resizing
+    window.addEventListener('resize', () => this._onWindowResize(), false);
+  }
+  
+  async _loadModels() {
+    try {
+      this.assetLoader = new AssetLoader();
+      const [baseModel, playerModel, chestModel] = await Promise.all([
+        this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/homenachooptimazado.glb`),
+        this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/newproject.glb`),
+        this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/chest.glb`)
+      ]);
+      
+      this._setupScene(baseModel.scene, playerModel.scene, chestModel.scene);
+      
+      // Set up animations if they exist
+      if (baseModel.animations && baseModel.animations.length > 0) {
+        this._setupAnimations(baseModel);
+      }
+      
+      // Hide loading screen if it exists
+      const loadingScreen = document.getElementById("loading-screen");
+      if (loadingScreen) loadingScreen.style.display = "none";
+      
+      return true;
+    } catch (error) {
+      console.error('Error loading models:', error);
+      return false;
+    }
+  }
+  
+  _setupScene(baseModel, playerModel, chestModel) {
+    // Clear scene
+    this.scene.clear();
+    
+    // Set up base model (terrain)
+    this.baseModel = baseModel;
+    baseModel.scale.set(300, 300, 300);
+    baseModel.position.set(0, -5, 0);
+    baseModel.rotation.set(0, Math.PI/4, 0);
+    
+    // Find important meshes
+    let planeMesh;
+    baseModel.traverse(child => {
+      if (child.isMesh) {
+        if (child.name === "Plane001") planeMesh = child;
+        if (child.name === "Cube010") this.cube010Mesh = child;
+        
+        // Enable shadows
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+    
+    if (!planeMesh) {
+      console.error('Plane001 mesh not found!');
+      return;
+    }
+    
+    // Get plane position information
+    const planePosition = new THREE.Vector3();
+    planeMesh.getWorldPosition(planePosition);
+    const planeBBox = new THREE.Box3().setFromObject(planeMesh);
+    const planeHeight = planeBBox.max.y - planeBBox.min.y;
+    
+    // Position player model
+    this.playerModel = playerModel;
+    playerModel.scale.set(90, 90, 90);
+    playerModel.position.set(
+      planePosition.x - 18000,
+      planePosition.y + planeHeight - 55000,
+      planePosition.z + 15000
+    );
+    
+    // Store player dimensions
+    playerModel.updateMatrixWorld(true);
+    const playerBBox = new THREE.Box3().setFromObject(playerModel);
+    this.playerHeight = playerBBox.max.y - playerBBox.min.y;
+    this.playerHalfWidth = (playerBBox.max.x - playerBBox.min.x) / 2;
+    this.playerHalfDepth = (playerBBox.max.z - playerBBox.min.z) / 2;
+    
+    // Store coordinate offset
+    this.coordinateOffset = new THREE.Vector3().copy(playerModel.position);
+    
+    // Position chest
+    this.chestModel = chestModel;
+    chestModel.scale.set(150, 150, 150);
+    chestModel.position.set(
+      planePosition.x - 50000,
+      planePosition.y + planeHeight - 36675,
+      planePosition.z + 12000
+    );
+    chestModel.rotation.y = -Math.PI/6;
+    
+    // Create star above chest
+    this._createStar(chestModel.position.clone());
+    
+    // Add black cube
+    const cubeGeometry = new THREE.BoxGeometry(250, 250, 250);
+    const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    cubeMesh.position.set(-5303, -5257, 3515);
+    this.scene.add(cubeMesh);
+    
+    // Add all models to scene
+    this.scene.add(baseModel, playerModel, chestModel);
+    
+    // Set up lighting
+    this._setupLighting();
+    
+    // Store reference to Plane001
+    this.planeMesh = planeMesh;
+    
+    // Set camera focus on player model
+    this.modelCenter = new THREE.Vector3().copy(playerModel.position);
+  }
+  
+  _createStar(position) {
+    // Create star shape
+    const starShape = new THREE.Shape();
+    const points = 5;
+    const innerRadius = 20;
+    const outerRadius = 40;
+    
+    starShape.moveTo(outerRadius, 0);
+    for (let i = 0; i < 2 * points; i++) {
+      const angle = (i * Math.PI) / points;
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      starShape.lineTo(
+        Math.cos(angle) * radius,
+        Math.sin(angle) * radius
+      );
+    }
+    starShape.closePath();
+    
+    const extrudeSettings = {
+      depth: 1,
+      bevelEnabled: true,
+      bevelSegments: 2,
+      steps: 2,
+      bevelSize: 5,
+      bevelThickness: 5
+    };
+    
+    const starGeometry = new THREE.ExtrudeGeometry(starShape, extrudeSettings);
+    const starMaterial = new THREE.MeshPhongMaterial({
+      color: 0xFFFF00,
+      specular: 0x111111,
+      shininess: 1000
+    });
+    
+    this.starMesh = new THREE.Mesh(starGeometry, starMaterial);
+    this.starMesh.scale.set(4, 4, 4);
+    this.starMesh.position.copy(position);
+    this.starMesh.position.y += 500;
+    this.starMesh.position.z -= 100;
+    this.starMesh.rotation.y = -Math.PI/4;
+    
+    // Add star to scene
+    this.scene.add(this.starMesh);
+    
+    // Create star light
+    this.starLight = new THREE.PointLight(0xffc45d, 10.0, 10000, 2);
+    this.starLight.position.copy(this.starMesh.position);
+    this.starLight.castShadow = true;
+    this.scene.add(this.starLight);
+    
+    this.starRotationSpeed = 1.5;
+  }
+  
+  _setupLighting() {
+    // Add ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    
+    // Add directional light with shadows
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(50, 100, -50);
+    directionalLight.castShadow = true;
+    
+    // Configure shadow properties
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 200;
+    directionalLight.shadow.camera.left = -100;
+    directionalLight.shadow.camera.right = 100;
+    directionalLight.shadow.camera.top = 100;
+    directionalLight.shadow.camera.bottom = -100;
+    
+    // Add lights to scene
+    this.scene.add(ambientLight, directionalLight);
+    
+    // Enable shadows in renderer
+    this.renderer.instance.shadowMap.enabled = true;
+    this.renderer.instance.shadowMap.type = THREE.PCFSoftShadowMap;
+  }
+  
+  _setupInput() {
+    this.input = new InputController();
+  }
+  
+  _initializeCharacterController() {
+    // Define a hover height value
+    const desiredHoverHeight = 50; // Adjust this value as needed
+
+    this.character = new CharacterController({
+      model: this.playerModel,
+      scene: this.scene,
+      gravity: this.gravity || -50000,
+      audioLoader: this.audioLoader,
+      listener: this.listener,
+      isMuted: this.isMuted,
+      walkSound: this.walkSound,
+      jumpSound: this.jumpSound,
+      playerHeight: this.playerHeight,
+      playerHalfWidth: this.playerHalfWidth,
+      playerHalfDepth: this.playerHalfDepth,
+      coordinateOffset: this.coordinateOffset,
+      movementSpeedMultiplier: this.movementSpeedMultiplier || 3,
+      hoverHeight: desiredHoverHeight // Pass the hover height here
+    });
+  }
+  
+  _initializeCamera() {
+    this.cameraController = new ThirdPersonCamera({
+      camera: this.camera,
+      target: this.playerModel,
+      radius: this.radius,
+      theta: this.theta,
+      phi: this.phi,
+      cameraRotateSpeed: this.cameraRotateSpeed,
+      freezeMovement: this.freezeMovement
+    });
+  }
+  
+  _setupAudio() {
+    // Background music
+    this.backgroundMusic = new THREE.Audio(this.listener);
+    this.audioLoader.load(
+      `${import.meta.env.BASE_URL}audio/cancionprincipal.mp3`,
+      (buffer) => {
+        this.backgroundMusic.setBuffer(buffer);
+        this.backgroundMusic.setLoop(true);
+        this.backgroundMusic.setVolume(this.isMuted ? 0 : 0.5);
+        if (!this.isMuted) {
+          this.backgroundMusic.play();
+          this.isMusicPlaying = true;
+        }
+      }
+    );
+    
+    // Creepy audio
+    this.creepyAudio = new THREE.Audio(this.listener);
+    this.audioLoader.load(
+      `${import.meta.env.BASE_URL}audio/pistacreepy.mp3`,
+      (buffer) => {
+        this.creepyAudio.setBuffer(buffer);
+        this.creepyAudio.setLoop(true);
+        this.creepyAudio.setVolume(0);
+      }
+    );
+    
+    this.creepyDistance = 10000;
+    this.isPlayingCreepy = false;
+  }
+  
+  _setupAnimations(model) {
+    this.mixer = new THREE.AnimationMixer(model.scene);
+    
+    model.animations.forEach((clip) => {
+      const action = this.mixer.clipAction(clip);
+      action.play();
+    });
+  }
+  
+  _setupGUI() {
+    const gui = new GUI();
+    gui.add(this.character, 'movementSpeedMultiplier', 0.5, 30.0).name('Speed Multiplier');
+  }
+  
+  _startGameLoop() {
+    const frame = () => {
+      requestAnimationFrame(frame);
+      
+      if (!this.initialized) return;
+      
+      // Fixed timestep for consistent physics
+      const deltaTime = 1/60;
+      this.time += deltaTime;
+      
+      // Update animations
+      if (this.mixer) this.mixer.update(deltaTime);
+      
+      // Rotate star if it exists
+      if (this.starMesh) {
+        this.starMesh.rotation.y += this.starRotationSpeed * deltaTime;
+      }
+      
+      // Handle camera rotation
+      const cameraTheta = this.cameraController.Update(deltaTime, this.input);
+      
+      // Update character and get status
+      const characterStatus = this.character.Update(deltaTime, this.input, cameraTheta);
+      
+      // Update model center for camera tracking
+      this.modelCenter.copy(this.playerModel.position);
+      
+      // Handle proximity based interactions
+      this._handleProximityEvents();
+      
+      // Update coordinate display
+      this._updateCoordinateDisplay(characterStatus);
+      
+      // Render scene
+      this.renderer.instance.render(this.scene, this.camera);
+    };
+    
+    frame();
+  }
+  
+  _handleProximityEvents() {
+    // Handle chest proximity
+    if (this.chestModel && this.playerModel) {
+      const distanceToChest = this.playerModel.position.distanceTo(this.chestModel.position);
+      if (distanceToChest < 1000 && !this.freezeMovement) {
+        this.freezeMovement = true;
+        this.chestMessage.style.display = 'block';
+        this.coordDisplay.style.display = 'none';
+      }
+      
+      // Handle chest interaction via Q key
+      if (this.freezeMovement && this.input.keys.quit) {
+        this.freezeMovement = false;
+        this.chestMessage.style.display = 'none';
+        
+        // Move player back from chest
+        const cameraForward = new THREE.Vector3();
+        this.camera.getWorldDirection(cameraForward);
+        const backwardVector = cameraForward.multiplyScalar(-100);
+        this.playerModel.position.add(backwardVector);
+        
+        this.coordDisplay.style.display = 'block';
+      }
+    }
+    
+    // Handle creepy audio proximity
+    if (this.cube010Mesh && this.playerModel) {
+      const distanceToCube = this.playerModel.position.distanceTo(this.cube010Mesh.position);
+      
+      if (distanceToCube <= this.creepyDistance) {
+        const volume = THREE.MathUtils.clamp(1 - (distanceToCube / this.creepyDistance), 0, 1);
+        
+        if (!this.isPlayingCreepy) {
+          if (this.backgroundMusic && this.backgroundMusic.isPlaying) {
+            this.backgroundMusic.pause();
+          }
+          
+          this.creepyAudio.play();
+          this.isPlayingCreepy = true;
+        }
+        
+        this.creepyAudio.setVolume(volume);
+      } else if (this.isPlayingCreepy) {
+        this.creepyAudio.stop();
+        this.isPlayingCreepy = false;
+        
+        if (this.isMusicPlaying && this.backgroundMusic && !this.backgroundMusic.isPlaying) {
+          this.backgroundMusic.play();
+        }
+      }
+    }
+  }
+  
+  _updateCoordinateDisplay(characterStatus) {
+    if (!this.coordDisplay || !this.playerModel) return;
+    
+    const pos = this.playerModel.position.clone().sub(this.coordinateOffset);
+    const meshName = characterStatus.currentCollisionMesh ?
+      (characterStatus.currentCollisionMesh.name || 'Unnamed Mesh') : 'None';
+
+    this.coordDisplay.textContent =
+      `X: ${pos.x.toFixed(1)} \u2022 ` +
+      `Y: ${pos.y.toFixed(1)} \u2022 ` +
+      `Z: ${pos.z.toFixed(1)} \n` +
+      `VelY: ${this.character.velocityY?.toFixed(1) || '0.0'} \u2022 ` +
+      `Grounded: ${characterStatus.isGrounded ? 'YES' : 'NO'} \n` +
+      `Colliding with: ${meshName}`;
+  }
+
+  _onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.instance.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  _createCoordinateDisplay() {
+    const div = document.createElement('div');
+    div.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      color: white;
+      font-family: monospace;
+      background: rgba(0,0,0,0.7);
+      padding: 8px;
+      border-radius: 4px;
+      z-index: 1000;
+    `;
+    document.body.appendChild(div);
+    return div;
+  }
+
+  _createChestMessage() {
+    const div = document.createElement('div');
+    div.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 2em;
+      text-align: center;
+      background: rgba(0,0,0,0.8);
+      padding: 20px;
+      border-radius: 10px;
+      display: none;
+      z-index: 1001;
+    `;
+    div.textContent = "Wow! A chest! I wonder what's inside";
+    document.body.appendChild(div);
+    return div;
+  }
+}
+
+// Start the game when DOM is loaded
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOMContentLoaded event fired."); // Log 1: Check if listener runs
+
+  const startButton = document.getElementById("startGameButton");
+  const mutedButton = document.getElementById("startMutedButton");
+  const buttonsContainer = document.getElementById("game-buttons");
+
+  console.log("startButton found:", startButton); // Log 2: Check if button exists
+  console.log("mutedButton found:", mutedButton); // Log 3: Check if button exists
+  console.log("buttonsContainer found:", buttonsContainer); // Log 4: Check if container exists
+
+  if (startButton && mutedButton && buttonsContainer) { // Also check container here
+    console.log("Buttons and container found, attaching listeners."); // Log 5: Confirm elements are ready
+
+    // Helper function to start the game
+    function startGame(muted = false) {
+      console.log(`startGame called with muted = ${muted}`); // Log 7: Check if startGame runs
+      if (buttonsContainer) {
+        console.log("Hiding buttons container."); // Log 8: Check if container is hidden
+        buttonsContainer.style.display = "none";
+      }
+      console.log("Creating new Game instance..."); // Log 9: Check before Game creation
+      new Game(muted);
+      console.log("New Game instance created."); // Log 10: Check after Game creation (might not show if constructor hangs)
+    }
+
+    // Set up button event listeners
+    startButton.addEventListener("click", () => {
+        console.log("Start Game button clicked!"); // Log 6a: Check if click fires
+        startGame(false);
+    });
+    mutedButton.addEventListener("click", () => {
+        console.log("Start Muted button clicked!"); // Log 6b: Check if click fires
+        startGame(true);
+    });
+    console.log("Event listeners attached."); // Log 11: Confirm listeners attached
+
+  } else {
+    // If no buttons found, log a warning
+    console.warn("One or more start elements (buttons or container) not found!");
+    // Optionally, you might still want to try starting the game if the buttons are missing for some reason
+    // console.log("Attempting to start game directly...");
+    // new Game(false); 
+  }
+});

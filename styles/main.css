@@ -23,3 +23,31 @@ body {
     font-family: Arial;
     z-index: 1000;
 } 
+
+#game-buttons {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+}
+
+#startGameButton, #startMutedButton {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+#startMutedButton {
+    background-color: #2196F3;
+}
+
+#startGameButton:hover, #startMutedButton:hover {
+    opacity: 0.9;
+} 

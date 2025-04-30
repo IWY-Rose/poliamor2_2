@@ -1,0 +1,1641 @@
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+[vite] connecting... client:742:9
+[vite] connected. client:865:15
+GET
+http://localhost:5173/favicon.ico
+[HTTP/1.1 404 Not Found 0ms]
+
+Three.js version: 152 main.js:197:17
+Starting model load... main.js:220:21
+Loading /models/homenachooptimazado.glb: 0.2% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 8.3% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 16.5% AssetLoader.js:34:29
+Loading /models/newproject.glb: 100.0% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 27.0% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 33.1% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 36.4% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 49.6% AssetLoader.js:34:29
+Loading /models/chest.glb: 100.0% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 52.5% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 66.1% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 82.6% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 99.2% AssetLoader.js:34:29
+Loading /models/homenachooptimazado.glb: 100.0% AssetLoader.js:34:29
+All models loaded successfully main.js:227:21
+Found Cube010 mesh: 
+Object { isObject3D: true, uuid: "9bbd5675-159d-40f9-b720-fe569875bbeb", name: "Cube010", type: "Mesh", parent: {…}, children: [], up: {…}, position: {…}, rotation: {…}, quaternion: {…}, … }
+main.js:372:25
+Base model surface height: 78.39087677001953 main.js:525:17
+New model position: 18127.34795202088 main.js:526:17
+Base Model Structure: main.js:528:17
+Base Model Part: Cube002 Mesh main.js:531:25
+Material 0 for Cube002 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cube005 Mesh main.js:531:25
+Material 0 for Cube005 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cone Mesh main.js:531:25
+Material 0 for Cone main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+Base Model Part: Cone001 Mesh main.js:531:25
+Material 0 for Cone001 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: images Mesh main.js:531:25
+Material 0 for images main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: images001 Mesh main.js:531:25
+Material 0 for images001 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: images002 Mesh main.js:531:25
+Material 0 for images002 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: images003 Mesh main.js:531:25
+Material 0 for images003 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere Mesh main.js:531:25
+Material 0 for Sphere main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: images004 Mesh main.js:531:25
+Material 0 for images004 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: images005 Mesh main.js:531:25
+Material 0 for images005 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder Mesh main.js:531:25
+Material 0 for Cylinder main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cone002 Mesh main.js:531:25
+Material 0 for Cone002 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Sphere001 Mesh main.js:531:25
+Material 0 for Sphere001 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder001 Mesh main.js:531:25
+Material 0 for Cylinder001 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere002 Mesh main.js:531:25
+Material 0 for Sphere002 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Plane001 Mesh main.js:531:25
+Material 0 for Plane001 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder002 Mesh main.js:531:25
+Material 0 for Cylinder002 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: New_Project Mesh main.js:531:25
+Material 0 for New_Project main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+Base Model Part: Cylinder007 Mesh main.js:531:25
+Material 0 for Cylinder007 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere008 Mesh main.js:531:25
+Material 0 for Sphere008 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder020 Mesh main.js:531:25
+Material 0 for Cylinder020 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere016 Mesh main.js:531:25
+Material 0 for Sphere016 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder023 Mesh main.js:531:25
+Material 0 for Cylinder023 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere019 Mesh main.js:531:25
+Material 0 for Sphere019 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder024 Mesh main.js:531:25
+Material 0 for Cylinder024 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere020 Mesh main.js:531:25
+Material 0 for Sphere020 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder028 Mesh main.js:531:25
+Material 0 for Cylinder028 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere024 Mesh main.js:531:25
+Material 0 for Sphere024 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cube_1 Mesh main.js:531:25
+Material 0 for Cube_1 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cube_2 Mesh main.js:531:25
+Material 0 for Cube_2 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Sphere004 Mesh main.js:531:25
+Material 0 for Sphere004 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder003 Mesh main.js:531:25
+Material 0 for Cylinder003 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere005 Mesh main.js:531:25
+Material 0 for Sphere005 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder004 Mesh main.js:531:25
+Material 0 for Cylinder004 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere006 Mesh main.js:531:25
+Material 0 for Sphere006 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder005 Mesh main.js:531:25
+Material 0 for Cylinder005 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere007 Mesh main.js:531:25
+Material 0 for Sphere007 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder006 Mesh main.js:531:25
+Material 0 for Cylinder006 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cube001 Mesh main.js:531:25
+Material 0 for Cube001 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder008 Mesh main.js:531:25
+Material 0 for Cylinder008 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder009 Mesh main.js:531:25
+Material 0 for Cylinder009 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder010 Mesh main.js:531:25
+Material 0 for Cylinder010 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder011 Mesh main.js:531:25
+Material 0 for Cylinder011 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder012 Mesh main.js:531:25
+Material 0 for Cylinder012 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cube008 Mesh main.js:531:25
+Material 0 for Cube008 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder013 Mesh main.js:531:25
+Material 0 for Cylinder013 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cube010 Mesh main.js:531:25
+Material 0 for Cube010 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+Base Model Part: Cylinder014 Mesh main.js:531:25
+Material 0 for Cylinder014 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cone003 SkinnedMesh main.js:531:25
+Material 0 for Cone003 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cone004 SkinnedMesh main.js:531:25
+Material 0 for Cone004 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cube011 SkinnedMesh main.js:531:25
+Material 0 for Cube011 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere009 SkinnedMesh main.js:531:25
+Material 0 for Sphere009 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere010 SkinnedMesh main.js:531:25
+Material 0 for Sphere010 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere011 SkinnedMesh main.js:531:25
+Material 0 for Sphere011 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere012 SkinnedMesh main.js:531:25
+Material 0 for Sphere012 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder015 Mesh main.js:531:25
+Material 0 for Cylinder015 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder016 Mesh main.js:531:25
+Material 0 for Cylinder016 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere013 Mesh main.js:531:25
+Material 0 for Sphere013 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder017 Mesh main.js:531:25
+Material 0 for Cylinder017 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere014 Mesh main.js:531:25
+Material 0 for Sphere014 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder018 Mesh main.js:531:25
+Material 0 for Cylinder018 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere015 Mesh main.js:531:25
+Material 0 for Sphere015 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder019 Mesh main.js:531:25
+Material 0 for Cylinder019 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere017 Mesh main.js:531:25
+Material 0 for Sphere017 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder021 Mesh main.js:531:25
+Material 0 for Cylinder021 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere018 Mesh main.js:531:25
+Material 0 for Sphere018 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder022 Mesh main.js:531:25
+Material 0 for Cylinder022 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Cylinder025 Mesh main.js:531:25
+Material 0 for Cylinder025 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere022 Mesh main.js:531:25
+Material 0 for Sphere022 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder026 Mesh main.js:531:25
+Material 0 for Cylinder026 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere023 Mesh main.js:531:25
+Material 0 for Sphere023 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+Base Model Part: Cylinder027 Mesh main.js:531:25
+Material 0 for Cylinder027 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+Base Model Part: Sphere025 Mesh main.js:531:25
+Material 0 for Sphere025 main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+normalMap: undefined main.js:965:29
+New Model Structure: main.js:536:17
+New Model Part: New_Project Mesh main.js:539:25
+Material 0 for New_Project main.js:955:21
+Material type: MeshStandardMaterial main.js:956:21
+map: undefined main.js:965:29
+Calculated player dimensions: 89.99483458600298 45 0.4821414862817619 main.js:557:17
+Animations found: 
+Array(10) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+main.js:232:25
+Animations set up and playing. main.js:764:17
+No loading screen found. Skipping hideLoadingScreen(). main.js:824:21
+THREE.WebGLProgram: Program Info Log: C:\fakepath(132,3-112): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll chunk-PLR55BCG.js:11826:15
+THREE.WebGLProgram: Program Info Log: C:\fakepath(297,3-112): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\fakepath(311,3-112): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll chunk-PLR55BCG.js:11826:15
+THREE.WebGLProgram: Program Info Log: C:\fakepath(297,3-112): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\fakepath(310,3-112): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll chunk-PLR55BCG.js:11826:15
+Renderer capabilities: 
+Object { isWebGL2: true, drawBuffers: true, getMaxAnisotropy: getMaxAnisotropy(), getMaxPrecision: getMaxPrecision(precision2), precision: "highp", logarithmicDepthBuffer: true, maxTextures: 16, maxVertexTextures: 16, maxTextureSize: 16384, maxCubemapSize: 16384, … }
+main.js:245:17
+Logarithmic depth support: true main.js:246:17
+THREE exists? true main.js:250:17
+Scene children: 
+Array(8) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+main.js:251:17
+ Player State Machine Created main.js:981:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+THREE.WebGLProgram: Program Info Log: C:\fakepath(132,3-112): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll chunk-PLR55BCG.js:11826:15
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
+ Updating State Machine for Idle main.js:803:25
+ StateMachine.Update called with input: 
+Object { state: "idle", input: {…} }
+main.js:115:17
