@@ -550,13 +550,22 @@ class Game {
     // --- End Death State Variables ---
 
     // --- Teleport State Variables ---
-    this.isPreTeleportLock = false;       // Player is locked before load
+    this.isPreTeleportLock = false;
     this.preTeleportLockTimer = 0;
-    this.preTeleportLockDuration = 1.0;   // 1-second lock phase
-    // Removed: isTeleportingFreeze, teleportFreezeTimer, teleportFreezeDuration
-    this.nextLevelPath = null;            // Path for the next level to load
-    this.columpioMesh = null;             // Reference to the teleport trigger mesh
+    this.preTeleportLockDuration = 1.0;
+    this.isTeleportingFreeze = false; // Add this flag to track the freeze state
+    this.teleportFreezeTimer = 0;     // Add timer for the freeze phase
+    this.teleportFreezeDuration = 2.0; // Define the freeze duration (e.g., 2 seconds)
+    this.nextLevelPath = null;
+    this.columpioMesh = null;
     // --- End Teleport State Variables ---
+
+    // --- Orbiting Light Variables ---
+    this.orbitingLight = null;            // Reference to the orbiting light
+    this.orbitCenter = new THREE.Vector3(0, 10000, 0); // Center of the orbit (can adjust Y)
+    this.orbitRadius = 25000;           // Radius of the orbit
+    this.orbitSpeed = 0.3;              // Speed of orbit (radians per second)
+    // --- End Orbiting Light Variables ---
 
     // --- Chest Physics Variables ---
     this.chestVelocityY = 0;
@@ -996,10 +1005,30 @@ class Game {
   
   // Re-added _setupLighting method definition
   _setupLighting() {
-    // Add ambient light
-    const ambientLight = new THREE.AmbientLight(0xff00ff, 0.5);
-    
-    // Add directional light with shadows
+    // Remove or comment out the AmbientLight
+    // const ambientLight = new THREE.AmbientLight(0xff00ff, 0.5);
+    // if (!this.scene.getObjectByName("ambientLight")) {
+    //   ambientLight.name = "ambientLight";
+    //   this.scene.add(ambientLight);
+    // }
+
+    // Add a new PointLight instead, using the ambient light's color
+    // Check if the light already exists (e.g., from a previous level load)
+    if (!this.orbitingLight) {
+        this.orbitingLight = new THREE.PointLight(0xff00ff, 0.8, 50000); // Color 0xff00ff, intensity 0.8, range 50000
+        // this.orbitingLight.position.set(0, 10000, 0); // Remove static position setting
+        this.orbitingLight.name = "replacementPointLight"; 
+        // Optional: Configure shadows if needed (be mindful of performance)
+        // this.orbitingLight.castShadow = true; 
+        
+        // Ensure we don't add it multiple times
+        if (!this.scene.getObjectByName("replacementPointLight")) {
+            this.scene.add(this.orbitingLight);
+        }
+    }
+
+
+    // Keep the Directional Light
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
     directionalLight.position.set(50, 100, -50); // Adjust position as needed
     directionalLight.castShadow = true;
@@ -1017,10 +1046,7 @@ class Game {
 
     // Add lights to scene only if they aren't already there
     // (This prevents adding lights multiple times on level change)
-    if (!this.scene.getObjectByName("ambientLight")) {
-      ambientLight.name = "ambientLight";
-      this.scene.add(ambientLight);
-    }
+    // Ambient light check removed
      if (!this.scene.getObjectByName("directionalLight")) {
        directionalLight.name = "directionalLight";
        this.scene.add(directionalLight);
@@ -1222,6 +1248,19 @@ class Game {
 
       // --- Regular Updates (only run if not frozen/in special state) ---
       // These only run if none of the above if/else if conditions were met.
+
+      // --- Update Orbiting Light ---
+      if (this.orbitingLight) {
+        const angle = this.time * this.orbitSpeed;
+        // Orbit in the YZ plane (keeping X constant)
+        this.orbitingLight.position.set(
+            this.orbitCenter.x, // Keep X the same as the orbit center's X
+            this.orbitCenter.y + this.orbitRadius * Math.sin(angle), // Oscillate Y
+            this.orbitCenter.z + this.orbitRadius * Math.cos(angle)  // Oscillate Z
+        );
+      }
+      // --- End Update Orbiting Light ---
+
 
       // Update Chest Physics
       if (this.chestModel) {
