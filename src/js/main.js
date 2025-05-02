@@ -246,7 +246,7 @@ class CharacterController {
     // Configure existing sounds if already loaded
     if (this.walkSound && !this.walkSound.buffer && this.audioLoader) {
       this.audioLoader.load(
-        `${import.meta.env.BASE_URL}audio/caminata.mp3`,
+        '/audio/caminata.mp3', // Updated path
         (buffer) => {
           this.walkSound.setBuffer(buffer);
           this.walkSound.setLoop(true);
@@ -257,7 +257,7 @@ class CharacterController {
     
     if (this.jumpSound && !this.jumpSound.buffer && this.audioLoader) {
       this.audioLoader.load(
-        `${import.meta.env.BASE_URL}audio/salto.mp3`,
+        '/audio/salto.mp3', // Updated path
         (buffer) => {
           this.jumpSound.setBuffer(buffer);
           this.jumpSound.setVolume(this.isMuted ? 0 : 0.5);
@@ -618,14 +618,14 @@ class Game {
 
       // Load initial player and chest models (assuming they are persistent across levels)
       const [playerModel, chestModel] = await Promise.all([
-        this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/newproject.glb`),
-        this.assetLoader.loadGLB(`${import.meta.env.BASE_URL}models/chest.glb`)
+        this.assetLoader.loadGLB('/models/newproject.glb'), // Updated path
+        this.assetLoader.loadGLB('/models/chest.glb') // Updated path
       ]);
       this._setupPlayer(playerModel.scene);
       this._setupChest(chestModel.scene); // Initial setup for chest model
 
       // Load the initial level
-      await this._loadLevel(`${import.meta.env.BASE_URL}models/juegomapa334433.glb`);
+      await this._loadLevel('/models/juegomapa334433.glb'); // Updated path
 
       // Initialize components that depend on player/level being loaded
       this._initializeCharacterController();
@@ -1103,7 +1103,7 @@ class Game {
     // Background music
     this.backgroundMusic = new THREE.Audio(this.listener);
     this.audioLoader.load(
-      `${import.meta.env.BASE_URL}audio/cancionprincipal.mp3`,
+      '/audio/cancionprincipal.mp3', // Updated path
       (buffer) => {
         this.backgroundMusic.setBuffer(buffer);
         this.backgroundMusic.setLoop(true);
@@ -1118,7 +1118,7 @@ class Game {
     // Creepy audio
     this.creepyAudio = new THREE.Audio(this.listener);
     this.audioLoader.load(
-      `${import.meta.env.BASE_URL}audio/pistacreepy.mp3`,
+      '/audio/pistacreepy.mp3', // Updated path
       (buffer) => {
         this.creepyAudio.setBuffer(buffer);
         this.creepyAudio.setLoop(true);
@@ -1447,7 +1447,7 @@ class Game {
             // Ensure controllers know immediately (via game loop update)
             this.input.resetMovementKeys(); // Prevent held keys
             this.preTeleportLockTimer = 0; // Reset PRE-LOCK timer
-            this.nextLevelPath = `${import.meta.env.BASE_URL}models/nivel1.glb`; // Set the target level
+            this.nextLevelPath = '/models/nivel1.glb'; // Updated path // Set the target level
 
             // DO NOT set isTeleportingFreeze = true here yet
             // DO NOT reset teleportFreezeTimer here yet
