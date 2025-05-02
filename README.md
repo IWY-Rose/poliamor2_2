@@ -10,5 +10,6 @@ https://www.youtube.com/watch?v=c8Pz3JKNH9A&ab_channel=gemelopar%C3%A1sito
 Thanks for reading.
 Dream your dreams.
 
-Developed by Golgi Studios 
+Developed by Golgi Studios
+
 https://poliamor2.cl/
