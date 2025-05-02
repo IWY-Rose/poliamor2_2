@@ -81,7 +81,7 @@ class ThirdPersonCamera {
     this.target = params.target; // The player model
 
     // Define the desired offset in the target's local space (behind and slightly up)
-    this.idealOffsetLocal = new THREE.Vector3(0, 15000, -15000); // Adjust z for distance, y for height
+    this.idealOffsetLocal = new THREE.Vector3(0, 150, -15000); // Adjust z for distance, y for height
 
     // Define the desired look-at point in the target's local space (in front and slightly up)
     this.idealLookAtLocal = new THREE.Vector3(0, 50, 100); // Adjust z to look further ahead, y for target height
@@ -531,19 +531,17 @@ class Game {
     this.isMovingCameraToCenital = false;
     this.isWaitingForDeathReload = false;
     this.deathAnimationTimer = 0;
-    this.deathAnimationDuration = 1.5; // Keep previous change
+    this.deathAnimationDuration = 1.5;
     this.cenitalCameraAnimationTimer = 0;
-    this.cenitalCameraAnimationDuration = 1.5; // Keep previous change
+    this.cenitalCameraAnimationDuration = 1.5;
     this.deathDelayTimer = 0;
-    this.deathDelayDuration = 3.0; // Keep previous change
+    this.deathDelayDuration = 3.0;
     this.initialDeathPlayerPosition = new THREE.Vector3();
     this.initialDeathXRotation = 0;
     this.targetDeathXRotation = 0;
     this.targetDeathYPosition = 0;
     this.initialCameraPosition = new THREE.Vector3();
-    this.initialCameraQuaternion = new THREE.Quaternion(); // <-- Add initial rotation storage
     this.targetCameraPositionPhase1 = new THREE.Vector3();
-    this.targetCameraQuaternionPhase1 = new THREE.Quaternion(); // <-- Add target rotation storage
     this.finalPlayerPosition = new THREE.Vector3();
     this.initialCameraCenitalPosition = new THREE.Vector3();
     this.targetCameraCenitalPosition = new THREE.Vector3();
@@ -566,34 +564,17 @@ class Game {
     this.orbitingLight = null;            // Reference to the orbiting light
     this.orbitCenter = new THREE.Vector3(0, 10000, 0); // Center of the orbit (can adjust Y)
     this.orbitRadius = 500000;           // Radius of the orbit - Increased from 25000
-    this.orbitSpeed = 0.001;              // Speed of orbit (radians per second) 
+    this.orbitSpeed = 1.0;              // Speed of orbit (radians per second) 
     // --- End Orbiting Light Variables ---
 
-    // --- Player Head Light Variables ---
-    this.playerHeadLight = null;          // Reference to the light orbiting the player
-    this.playerLightOffsetY = 2500;       // How far above the player's base position
-    this.playerLightOrbitRadius = 1500;   // Horizontal radius around the player
-    this.playerLightOrbitSpeed = 2.5;     // Speed of orbit around the player
-    // --- End Player Head Light Variables ---
-
-    // --- Player Chest Orbit Variables ---
-    this.orbitingChestIndex = 1; // Index of the chest in chestSets that should orbit (0 = first, 1 = second)
-    this.playerChestOffsetY = 3500; // How far above the player's base position
-    this.playerChestOrbitRadius = 2500; // Horizontal radius around the player
-    this.playerChestOrbitSpeed = 1.5;  // Speed of orbit around the player
-    // --- End Player Chest Orbit Variables ---
-
-    // --- Chest Variables ---
-    this.baseChestScene = null; // To store the loaded chest model scene
-    this.chestSets = [];       // Array to hold all chest instances { chestModel, starMesh, starLight, velocityY, isGrounded }
+    // --- Chest Physics Variables ---
+    this.chestVelocityY = 0;
+    this.isChestGrounded = false;
+    this.chestRaycaster = new THREE.Raycaster();
     this.chestGravity = -50000;
     this.chestHoverHeight = 5;
     this.starYOffset = 1000;
-    this.chestRaycaster = new THREE.Raycaster(); // One raycaster can be reused
-    // Remove individual chest physics state if managed per-set
-    // this.chestVelocityY = 0; 
-    // this.isChestGrounded = false; 
-    // --- End Chest Variables ---
+    // --- End Chest Physics Variables ---
 
     // Setup basic properties
     this.time = 0;
@@ -636,55 +617,29 @@ class Game {
 
     // Handle window resizing
     window.addEventListener('resize', () => this._onWindowResize(), false);
-
-    // --- Chest Interaction Variables ---
-    this.interactingChestSet = null; // Stores the chest the player is interacting with
-    this.isMovingBackFromChest = false; // Flag for the backward movement state
-    this.moveBackTimer = 0;
-    this.moveBackDuration = 1; // Seconds for backward movement
-    this.moveBackDistance = 1000; // Units to move back
-    this.moveBackStartPosition = new THREE.Vector3();
-    this.moveBackTargetPosition = new THREE.Vector3();
-    this.moveBackStartRotationY = 0; // <--- Add starting rotation
-    this.moveBackTotalRotation = Math.PI * 6; // <--- Add total rotation (e.g., 360 degrees)
-    // --- End Chest Interaction Variables ---
   }
   
   // New function to handle the overall initialization sequence
   async _initializeGame() {
     try {
-      this._setupInput(); 
-      this.assetLoader = new AssetLoader(); 
+      this._setupInput(); // Input needs to be ready early
+      this.assetLoader = new AssetLoader(); // Loader needed for levels
 
-      // --- Create Player Head Light ---
-      // Choose color, intensity, distance (range), decay
-      // this.playerHeadLight = new THREE.PointLight(0xffc45d, 10.0, 10000, 2); // Cyan, intensity 1.5, range 5000, decay 2
-      // this.playerHeadLight.name = "playerHeadOrbitLight";
-      // Start position will be set in the game loop, but add it to the scene now
-      // this.scene.add(this.playerHeadLight);
-      // console.log("Player head light created and added to scene.");
-      // --- End Create Player Head Light ---
-
-      // --- Load Base Models (Player & Chest) ---
-      console.log("Loading base player and chest models...");
-      const [playerModel, baseChestModel] = await Promise.all([
-        this.assetLoader.loadGLB('/models/newproject.glb'), 
-        this.assetLoader.loadGLB('/models/chest.glb')  // Load chest GLB only once
+      // Load initial player and chest models (assuming they are persistent across levels)
+      const [playerModel, chestModel] = await Promise.all([
+        this.assetLoader.loadGLB('/models/newproject.glb'), // Updated path
+        this.assetLoader.loadGLB('/models/chest.glb') // Updated path
       ]);
-      this.baseChestScene = baseChestModel.scene; // Store the base scene to clone later
-      console.log("Base models loaded.");
-
-      // Setup Player (uses the loaded playerModel)
-      this._setupPlayer(playerModel.scene); 
-      // REMOVED: this._setupChest(chestModel.scene); - Chest instances created later
+      this._setupPlayer(playerModel.scene);
+      this._setupChest(chestModel.scene); // Initial setup for chest model
 
       // Load the initial level
-      await this._loadLevel('/models/juegomapa334433.glb'); 
+      await this._loadLevel('/models/juegomapa334433.glb'); // Updated path
 
-      // Initialize components 
+      // Initialize components that depend on player/level being loaded
       this._initializeCharacterController();
       this._initializeCamera();
-      this._setupAudio(); 
+      this._setupAudio(); // Audio might depend on listener attached to camera
       this._setupGUI();
 
       this.initialized = true;
@@ -696,6 +651,7 @@ class Game {
       
     } catch (error) {
       console.error('Error initializing game:', error);
+       // Show error to user?
     }
   }
 
@@ -811,7 +767,7 @@ class Game {
 
               spawnPosition.set(
                   pisoCenter.x,       // Use the calculated X center
-                  planeHeight + 5000,  // Place slightly above the plane surface
+                  planeHeight + 100,  // Place slightly above the plane surface
                   pisoCenter.z        // Use the calculated Z center
               );
           } else if (this.currentLevelPath.endsWith('nivel1.glb')) {
@@ -866,71 +822,49 @@ class Game {
          this.cameraController._UpdateCamera(); // Force snap to new player position/orientation
       }
 
-      // --- Reset and Place Chests ---
-      // Clear previous chests from scene and array
-      this.chestSets.forEach(set => {
-          this.scene.remove(set.chestModel);
-          this.scene.remove(set.starMesh);
-          this.scene.remove(set.starLight);
-          // Optional: Dispose geometry/material if needed
-          // set.starMesh.geometry.dispose(); set.starMesh.material.dispose(); ...
-      });
-      this.chestSets = []; // Clear the array
+      // Reposition chest (using similar conditional logic if needed)
+      if (this.chestModel && planeMesh) {
+           const planePosition = new THREE.Vector3();
+           planeMesh.getWorldPosition(planePosition);
+           const planeBBox = new THREE.Box3().setFromObject(planeMesh);
+           const planeHeight = planeBBox.max.y;
 
-      // Determine chest positions based on the level
-      if (planeMesh) { 
-          const planePosition = new THREE.Vector3();
-          planeMesh.getWorldPosition(planePosition);
-          const planeBBox = new THREE.Box3().setFromObject(planeMesh);
-          const planeHeight = planeBBox.max.y;
+           // Example: Chest position might be fixed relative to world or spawn
+           let chestPos = new THREE.Vector3();
+            if (this.currentLevelPath.endsWith('juegomapa334433.glb')) {
+                // Position chest relative to the new player spawn (center of piso)
+                 const chestOffset = new THREE.Vector3(10000, 0, 5000); // Example offset from center
+                 chestPos.copy(spawnPosition).add(chestOffset);
+                 chestPos.y = planeHeight + 100; // Ensure it's above ground
 
-          let chestPos1 = new THREE.Vector3();
-          let chestPos2 = new THREE.Vector3(); // Position for the second chest
+            } else if (this.currentLevelPath.endsWith('nivel1.glb')) {
+                 // !!! Define chest position for nivel1.glb !!!
+                 chestPos.set(
+                    spawnPosition.x + 10000, // Example: Near the player spawn for nivel1
+                    planeHeight + 100,
+                    spawnPosition.z
+                 );
+            } else {
+                 // Default chest position if 'piso' exists but level unknown
+                 chestPos.copy(spawnPosition).add(new THREE.Vector3(5000, 0, 0));
+            }
 
-          if (this.currentLevelPath.endsWith('juegomapa334433.glb')) {
-              // Chest 1 relative to player spawn (center of piso)
-              const chestOffset1 = new THREE.Vector3(10000, 0, 5000);
-              chestPos1.copy(spawnPosition).add(chestOffset1);
-              // Set a desired fixed height - physics will ignore this chest
-              chestPos1.y = planeHeight - 4000; // Example: 30k units above plane
+           this.chestModel.position.copy(chestPos);
+           this.chestModel.rotation.y = -Math.PI/6; // Or maybe reset rotation too?
+           this.chestVelocityY = 0;
+           this.isChestGrounded = false;
+           console.log("Chest position reset relative to level:", this.chestModel.position);
 
-              // Chest 2 position - ** Define a DIFFERENT position **
-              const chestOffset2 = new THREE.Vector3(-15000, 0, -8000); // Example different offset
-              chestPos2.copy(spawnPosition).add(chestOffset2);
-              chestPos2.y = planeHeight + 100; 
-
-          } else if (this.currentLevelPath.endsWith('nivel1.glb')) {
-              // Chest 1 position for nivel1.glb
-              chestPos1.set(spawnPosition.x + 10000, planeHeight + 30000, spawnPosition.z); // Set fixed height here too
-              
-              // Chest 2 position for nivel1.glb - ** Define a DIFFERENT position **
-              chestPos2.set(spawnPosition.x - 5000, planeHeight + 100, spawnPosition.z + 15000); // Example
-
-          } else {
-              // Default positions if level unknown but piso exists
-              chestPos1.copy(spawnPosition).add(new THREE.Vector3(5000, 0, 0));
-              chestPos1.y = planeHeight + 30000; // Default fixed height
-              chestPos2.copy(spawnPosition).add(new THREE.Vector3(-5000, 0, 5000)); // Example
-              chestPos2.y = planeHeight + 100;
-          }
-
-          // Add the chest instances
-          // First chest - default scale, ignore physics
-          this._addChestInstance(chestPos1, -Math.PI/6, 1, true); // Set ignorePhysics = true
-          // Second chest - scaled, ignore physics (because it's orbiting)
-          this._addChestInstance(chestPos2, Math.PI/4, 100.0, true); // Set ignorePhysics = true
-
-      } else {
-          console.warn("'piso' not found, cannot accurately position chests. Placing defaults near player.");
-          // Add default chests near player spawn
-          // First chest - default scale, ignore physics
-          this._addChestInstance(spawnPosition.clone().add(new THREE.Vector3(5000, 30000, 0)), -Math.PI/6, 1, true); // Fixed height
-          // Second chest - scaled up, ignore physics
-          this._addChestInstance(spawnPosition.clone().add(new THREE.Vector3(-5000, 100, 5000)), Math.PI/4, 1.5, true); // Still ignoring physics
+      } else if (this.chestModel) {
+          console.warn("'piso' not found, cannot accurately reposition chest. Placing near player.");
+          // Place it near player based on calculated spawnPosition
+          this.chestModel.position.copy(spawnPosition).add(new THREE.Vector3(5000, 0, 0));
+           this.chestVelocityY = 0;
+           this.isChestGrounded = false;
       }
-      // --- End Reset and Place Chests ---
 
-      // REMOVED: _updateStarAndLightPosition(); - This is handled in the game loop now
+      // Update star/light position
+      this._updateStarAndLightPosition();
   }
 
 
@@ -1082,8 +1016,7 @@ class Game {
     // Check if the light already exists (e.g., from a previous level load)
     if (!this.orbitingLight) {
         // Increased intensity from 0.8 to 1.5
-        this.orbitingLight = new THREE.PointLight(0xff00ff, 1.8, 2000000, 2); // Color 0xff00ff, intensity 1.5, range 50000
-        //this.orbitingLight = new THREE.PointLight(0xffc45d, 1.8, 2000000, 2);
+        this.orbitingLight = new THREE.PointLight(0xff00ff, 1.8, 5000000); // Color 0xff00ff, intensity 1.5, range 50000
         // this.orbitingLight.position.set(0, 10000, 0); // Remove static position setting
         this.orbitingLight.name = "replacementPointLight"; 
         // Optional: Configure shadows if needed (be mindful of performance)
@@ -1138,7 +1071,6 @@ class Game {
 
   // Removed _setupScene - its logic is now in _setupLevelScene
 
-  /*
   // Helper to update star/light pos based on chest
   _updateStarAndLightPosition() {
       if (this.starMesh && this.chestModel) {
@@ -1152,7 +1084,6 @@ class Game {
             this.starLight.position.copy(this.starMesh.position);
         }
   }
-  */
 
   
   _setupInput() {
@@ -1251,20 +1182,18 @@ class Game {
       if (!this.initialized) return;
       
       // --- Update shared freezeMovement status ---
-      // Prioritize freeze states: Death > PreTeleport > Teleport > MoveBack > Untextured Warning > Manual Freeze
+      // Prioritize freeze states: Death > PreTeleport > Teleport > Untextured Warning > Manual Freeze
       let frameFreeze = false;
       if (this.isDyingPhase1 || this.isMovingCameraToCenital || this.isWaitingForDeathReload) {
           frameFreeze = true;
-      } else if (this.isPreTeleportLock) {
+      } else if (this.isPreTeleportLock) { // Check new pre-teleport lock state
           frameFreeze = true;
       } else if (this.isTeleportingFreeze) {
           frameFreeze = true;
-      } else if (this.isMovingBackFromChest) { // <--- Add check for new state
-          frameFreeze = true;
       } else if (this.frozenByUntexturedWarning) {
-          frameFreeze = true;
+          frameFreeze = true; // Warning explicitly freezes
       } else {
-          frameFreeze = this.freezeMovement;
+          frameFreeze = this.freezeMovement; // Use general freeze if no specific state active
       }
 
       // Update controller params based on calculated freeze state
@@ -1277,54 +1206,47 @@ class Game {
       this.time += deltaTime;
 
       // --- Update Player Bounding Box ---
-      // Only update if not in a state that modifies position externally (like death or move back)
-      if (this.playerModel && !this.isDyingPhase1 && !this.isMovingCameraToCenital && !this.isWaitingForDeathReload && !this.isMovingBackFromChest) {
+      if (this.playerModel && !this.isDyingPhase1 && !this.isMovingCameraToCenital && !this.isWaitingForDeathReload) {
          this.playerBox.setFromObject(this.playerModel, true);
       }
       // --- End Player Bounding Box Update ---
 
-      // --- Handle State Updates (Death, Teleport, MoveBack Phases) ---
+      // --- Handle State Updates (Death, Teleport Phases) ---
       // NOTE: Order matters here. Check most critical/overriding states first.
       if (this.isDyingPhase1) {
         this._updateDeathAnimationPhase1(deltaTime);
-        // Update chests even during death anim? Maybe.
-        this._updateChestPhysics(deltaTime); 
+        if (this.chestModel) this._updateChestPhysics(deltaTime); // Keep chest physics going
         this.renderer.instance.render(this.scene, this.camera); // Render death anim
         return;
       } else if (this.isMovingCameraToCenital) {
         this._updateCenitalCameraAnimation(deltaTime);
-        this._updateChestPhysics(deltaTime);
+        if (this.chestModel) this._updateChestPhysics(deltaTime);
         this.renderer.instance.render(this.scene, this.camera); // Render cam move
         return;
       } else if (this.isWaitingForDeathReload) {
         this._updateDeathDelay(deltaTime);
-        this._updateChestPhysics(deltaTime);
+        if (this.chestModel) this._updateChestPhysics(deltaTime);
         this.renderer.instance.render(this.scene, this.camera); // Render final frame
         return;
-      } else if (this.isPreTeleportLock) { 
-          this._updatePreTeleportLock(deltaTime); 
-          this._updateChestPhysics(deltaTime);
+      } else if (this.isPreTeleportLock) { // Check for the new 1-second lock phase
+          this._updatePreTeleportLock(deltaTime); // Update lock timer, potentially transition state
+          // Player movement is frozen via frameFreeze, but game logic continues
+          // We still need to update chest, animations, etc. and render normally during this phase.
+          if (this.chestModel) this._updateChestPhysics(deltaTime);
           if (this.mixer) this.mixer.update(deltaTime);
-          this.chestSets.forEach(set => { if(set.starMesh) set.starMesh.rotation.y += this.starRotationSpeed * deltaTime; });
-          this._updateCoordinateDisplay(this.character.Update(0, this.input, this.cameraController.theta)); // Get status
-          this.renderer.instance.render(this.scene, this.camera); 
-          return; 
-      } else if (this.isTeleportingFreeze) { 
-        this._updateTeleportFreeze(deltaTime); 
-        this._updateChestPhysics(deltaTime);
-        this.renderer.instance.render(this.scene, this.camera); // Render frozen frame
-        return; 
-      } else if (this.isMovingBackFromChest) { // <--- Add call to new update function
-          this._updateMoveBackFromChest(deltaTime);
-          // Update chests while moving back? Seems reasonable.
-          this._updateChestPhysics(deltaTime); 
-          // Update animations? Yes.
-          if (this.mixer) this.mixer.update(deltaTime); 
-          this.chestSets.forEach(set => { if(set.starMesh) set.starMesh.rotation.y += this.starRotationSpeed * deltaTime; });
-          // Update coords (shows fixed coords during move back)? Maybe not needed.
-          // this._updateCoordinateDisplay(...); 
-          this.renderer.instance.render(this.scene, this.camera); // Render the backward movement
+          if (this.starMesh) this.starMesh.rotation.y += this.starRotationSpeed * deltaTime;
+          // Camera updates are skipped because frameFreeze is true
+          // Character updates are skipped because frameFreeze is true (and we're already in a teleport state)
+          this._updateCoordinateDisplay(this.character.Update(0, this.input, this.cameraController.theta)); // Pass 0 delta to get status without update
+          this.renderer.instance.render(this.scene, this.camera); // Render normally during lock phase
           return; // Exit here for this frame
+      } else if (this.isTeleportingFreeze) { // Check for the 2-second freeze phase
+        this._updateTeleportFreeze(deltaTime); // Handles 2s timer and triggers level load
+        // During this phase, rendering is frozen (implicitly by returning),
+        // but we might still want physics to run if needed (e.g., chest falling).
+        if (this.chestModel) this._updateChestPhysics(deltaTime);
+        this.renderer.instance.render(this.scene, this.camera); // Render the frozen frame
+        return; // Exit to maintain frozen image
       }
       // --- End State Updates ---
 
@@ -1344,80 +1266,33 @@ class Game {
       }
       // --- End Update Orbiting Light ---
 
-      // --- Update Player Head Light Position ---
-      /* // Commented out player head light update
-      if (this.playerHeadLight && this.playerModel && !frameFreeze) { // Check for player model & freeze state
-        const angle = this.time * this.playerLightOrbitSpeed;
-        // Calculate position relative to the player model
-        this.playerHeadLight.position.set(
-            this.playerModel.position.x + this.playerLightOrbitRadius * Math.cos(angle), // Orbit X around player
-            this.playerModel.position.y + this.playerLightOffsetY,                       // Fixed height above player
-            this.playerModel.position.z + this.playerLightOrbitRadius * Math.sin(angle)  // Orbit Z around player
-        );
+
+      // Update Chest Physics
+      if (this.chestModel) {
+          this._updateChestPhysics(deltaTime);
       }
-      */
-      // --- End Update Player Head Light Position ---
-      
-      // --- Update Camera FIRST to get theta for the character ---
-      // !!! THIS WAS THE INCORRECT PLACEMENT - REMOVE FROM HERE !!!
-      // const cameraTheta = this.cameraController.Update(deltaTime, this.input);
-      
-      // --- Update Character ---
-      // Pass the *current* camera theta, which might be slightly off if camera hasn't updated yet,
-      // but camera needs the LATEST character position anyway. We'll update camera AFTER character.
-      const characterStatus = this.character.Update(deltaTime, this.input, this.cameraController.theta); // Use existing theta for now
-      // --- End Update Character ---
-
-
-      // --- Update Orbiting Chest Position ---
-      // Check if the orbitingLight exists and the player model exists (for freeze check)
-      if (this.orbitingLight && this.chestSets.length > this.orbitingChestIndex && this.chestSets[this.orbitingChestIndex] && this.playerModel && !frameFreeze) {
-        const orbitingChestSet = this.chestSets[this.orbitingChestIndex];
-        const angle = this.time * this.playerChestOrbitSpeed; // Use the chest's orbit speed
-
-        // --- Calculate position relative to the orbitingLight's current position ---
-        const lightPosition = this.orbitingLight.position; // Get the light's current position
-        orbitingChestSet.chestModel.position.set(
-            lightPosition.x + this.playerChestOrbitRadius * Math.cos(angle), // Orbit X around light's X
-            lightPosition.y + this.playerChestOffsetY,                       // Apply Y offset relative to light's Y
-            lightPosition.z + this.playerChestOrbitRadius * Math.sin(angle)  // Orbit Z around light's Z
-        );
-        // --- End position calculation ---
-        
-        // Override physics for this chest
-        orbitingChestSet.velocityY = 0;
-        orbitingChestSet.isGrounded = true; 
-      }
-      // --- End Update Orbiting Chest Position ---
-
-
-      // Update Chest Physics (including the orbiting one's star/light)
-      this._updateChestPhysics(deltaTime);
 
       // Update Level Animations
       if (this.mixer) this.mixer.update(deltaTime);
 
-      // Rotate Stars
-      this.chestSets.forEach(set => {
-        if(set.starMesh) {
-             set.starMesh.rotation.y += this.starRotationSpeed * deltaTime; 
-        }
-      });
+      // Rotate star
+      if (this.starMesh) {
+        this.starMesh.rotation.y += this.starRotationSpeed * deltaTime;
+      }
 
-      // --- Update Camera AFTER Character and Orbiting Chest ---
-      // Now the camera updates based on the character's NEW position for this frame.
-      // The character used the previous frame's theta for movement, which is generally okay.
-      const cameraTheta = this.cameraController.Update(deltaTime, this.input); 
-      // --- End Update Camera ---
+      // Update Camera
+      const cameraTheta = this.cameraController.Update(deltaTime, this.input);
 
+      // Update Character
+      const characterStatus = this.character.Update(deltaTime, this.input, cameraTheta);
 
       // Update model center for camera tracking
       if (!frameFreeze) {
           this.modelCenter.copy(this.playerModel.position);
       }
 
-      // Handle proximity events
-      this._handleProximityEvents(); 
+      // Handle proximity events (collision checks for death, teleport, chest)
+      this._handleProximityEvents(); // This might set isDyingPhase1 or isPreTeleportLock
 
       // Update coordinate display
       this._updateCoordinateDisplay(characterStatus);
@@ -1494,14 +1369,14 @@ class Game {
     this.deathAnimationTimer += deltaTime;
     const progress = Math.min(this.deathAnimationTimer / this.deathAnimationDuration, 1.0);
 
-    // Interpolate Player Rotation (X-axis) - Remains the same
+    // Interpolate Player Rotation (X-axis)
     this.playerModel.rotation.x = THREE.MathUtils.lerp(
         this.initialDeathXRotation,
         this.targetDeathXRotation,
         progress
     );
 
-    // Interpolate Player Position (Y-axis) - Remains the same
+    // Interpolate Player Position (Y-axis)
     const currentY = THREE.MathUtils.lerp(
         this.initialDeathPlayerPosition.y,
         this.targetDeathYPosition,
@@ -1509,19 +1384,15 @@ class Game {
     );
     this.playerModel.position.y = currentY;
 
-    // Interpolate Camera Position (Initial Zoom) - Remains the same
+    // Interpolate Camera Position (Initial Zoom)
     this.camera.position.lerpVectors(
         this.initialCameraPosition,
         this.targetCameraPositionPhase1, // Use Phase 1 target
         progress
     );
 
-    // Interpolate Camera Rotation (Quaternion Slerp) - NEW
-    this.camera.quaternion.slerpQuaternions(
-        this.initialCameraQuaternion,
-        this.targetCameraQuaternionPhase1,
-        progress
-    );
+    // Ensure camera keeps looking at the player
+    this.camera.lookAt(this.playerModel.position);
 
     // Check for completion of Phase 1
     if (progress >= 1.0) {
@@ -1530,23 +1401,26 @@ class Game {
         this.isMovingCameraToCenital = true; // Start phase 2
 
         // Store final state of phase 1 / initial state for phase 2
-        // NOTE: These should now correctly capture the interpolated end state
         this.finalPlayerPosition.copy(this.playerModel.position);
         this.initialCameraCenitalPosition.copy(this.camera.position);
         this.initialCameraCenitalQuaternion.copy(this.camera.quaternion);
 
-        // Calculate target state for phase 2 (remains the same logic)
-        const overheadDistance = 5000;
+        // Calculate target state for phase 2
+        // Target position: Directly above the player's final spot
+        const overheadDistance = 5000; // Adjust as needed
         this.targetCameraCenitalPosition.set(
             this.finalPlayerPosition.x,
             this.finalPlayerPosition.y + overheadDistance,
             this.finalPlayerPosition.z
         );
-        const tempCam = new THREE.PerspectiveCamera();
-        tempCam.position.copy(this.targetCameraCenitalPosition);
-        tempCam.lookAt(this.finalPlayerPosition);
-        tempCam.updateWorldMatrix(true, false);
-        this.targetCameraCenitalQuaternion.copy(tempCam.quaternion);
+
+        // Calculate target quaternion (looking down)
+        // Use a temporary camera to calculate the quaternion without moving the actual camera yet
+        const tempCam = new THREE.PerspectiveCamera(); // Or use this.camera if careful
+        tempCam.position.copy(this.targetCameraCenitalPosition); // Position it overhead
+        tempCam.lookAt(this.finalPlayerPosition); // Make it look down
+        tempCam.updateWorldMatrix(true, false); // Update its matrix
+        this.targetCameraCenitalQuaternion.copy(tempCam.quaternion); // Get the resulting quaternion
 
         // Reset timer for phase 2
         this.cenitalCameraAnimationTimer = 0;
@@ -1603,8 +1477,7 @@ class Game {
 
   _handleProximityEvents() {
     // Exit early if any death, pre-teleport, or teleport freeze is active
-    // OR if we are currently moving back from a chest
-    if (this.isDyingPhase1 || this.isMovingCameraToCenital || this.isWaitingForDeathReload || this.isPreTeleportLock || this.isTeleportingFreeze || this.isMovingBackFromChest) return;
+    if (this.isDyingPhase1 || this.isMovingCameraToCenital || this.isWaitingForDeathReload || this.isPreTeleportLock || this.isTeleportingFreeze) return;
 
     // --- Teleport Collision Check ---
     if (this.columpioMesh && this.playerModel && !this.freezeMovement) { // Check general freeze flag too
@@ -1648,34 +1521,12 @@ class Game {
                      this.characterParams.freezeMovement = true;
                      this.cameraParams.freezeMovement = true;
                      this.input.resetMovementKeys();
-    
-                     // --- Capture Initial State ---
                      this.initialDeathPlayerPosition.copy(this.playerModel.position);
                      this.initialDeathXRotation = this.playerModel.rotation.x;
-                     this.initialCameraPosition.copy(this.camera.position); // Already done
-                     this.initialCameraQuaternion.copy(this.camera.quaternion); // <-- Capture initial quaternion
-    
-                     // --- Calculate Target State for Phase 1 ---
                      this.targetDeathXRotation = this.initialDeathXRotation + Math.PI / 2;
-                     this.targetDeathYPosition = this.initialDeathPlayerPosition.y - 1000; // Example downward movement
-    
-                     // Calculate a reasonable target position for the camera in phase 1
-                     // (Example: slightly further back and higher than initial)
-                     const offset = new THREE.Vector3(0, 1500, -2000); // Adjust as needed
-                     this.targetCameraPositionPhase1.copy(this.initialDeathPlayerPosition).add(offset);
-    
-                     // Calculate the target rotation for Phase 1 (looking at initial death position)
-                     const tempMatrix = new THREE.Matrix4();
-                     tempMatrix.lookAt(
-                         this.targetCameraPositionPhase1,    // Eye position
-                         this.initialDeathPlayerPosition,    // Target position to look at
-                         this.camera.up                     // Up vector (usually (0, 1, 0))
-                     );
-                     this.targetCameraQuaternionPhase1.setFromRotationMatrix(tempMatrix); // <-- Calculate target quaternion
-                     // --- End Calculate Target State ---
-    
-                     this.deathAnimationTimer = 0; // Reset timer
-    
+                     this.targetDeathYPosition = this.initialDeathPlayerPosition.y - 1000;
+                     this.deathAnimationTimer = 0;
+
                      return; // Exit proximity checks
                  }
 
@@ -1710,67 +1561,46 @@ class Game {
     }
 
 
-    // --- Handle chest proximity (loop through all chests) ---
-    let isNearAnyChest = false;
-    let nearbyChestSet = null; // Temporary variable to find the nearest chest this frame
+    // Handle chest proximity (only if not frozen by other interactions)
+    if (this.chestModel && this.playerModel && !this.freezeMovement) {
+      const distanceToChest = this.playerModel.position.distanceTo(this.chestModel.position);
 
-    if (this.playerModel && !this.freezeMovement && this.chestSets.length > 0) {
-        for (const set of this.chestSets) {
-            const distanceToChest = this.playerModel.position.distanceTo(set.chestModel.position);
-            if (distanceToChest < 1000) { // Adjust proximity distance if needed
-                isNearAnyChest = true;
-                nearbyChestSet = set; // Store the set we are near
-                break; // Found a nearby chest, no need to check others
-            }
-        }
-    }
-
-    // Freeze/Show message if near ANY chest and not already interacting
-    if (isNearAnyChest && !this.freezeMovement) { // Check freezeMovement to avoid re-triggering
-        console.log("Near a chest, freezing movement.");
-        this.freezeMovement = true;
-        this.interactingChestSet = nearbyChestSet; // Store the chest we are interacting with
-        this.frozenByUntexturedWarning = false;
+      if (distanceToChest < 1000) {
+        console.log("Near chest, freezing movement.");
+        this.freezeMovement = true; // Set general freeze
+        this.frozenByUntexturedWarning = false; // Not a warning freeze
         this.characterParams.freezeMovement = true;
         this.cameraParams.freezeMovement = true;
         this.chestMessage.style.display = 'block';
         this.coordDisplay.style.display = 'none';
-    }
-    // --- End Handle chest proximity ---
+      }
+      }
 
     // Handle chest interaction via Q key (only if frozen specifically for the chest)
-    const wasFrozenForChest = this.freezeMovement && this.interactingChestSet && !this.frozenByUntexturedWarning && !this.isPreTeleportLock && !this.isTeleportingFreeze && !this.isDyingPhase1;
-    if (wasFrozenForChest && this.input.keys.quit && this.chestMessage.style.display === 'block') {
-        console.log("Q pressed near chest. Initiating move back.");
-        
-        // Calculate backward direction
-        const direction = new THREE.Vector3();
-        direction.subVectors(this.playerModel.position, this.interactingChestSet.chestModel.position);
-        direction.y = 0; // Keep movement horizontal
-        direction.normalize();
+    // Ensure it doesn't interfere with teleport/death states
+    if (this.freezeMovement && !this.frozenByUntexturedWarning && !this.isPreTeleportLock && !this.isTeleportingFreeze && !this.isDyingPhase1 /* etc. */ && this.input.keys.quit && this.chestMessage.style.display === 'block') {
+        console.log("Leaving chest, unfreezing movement.");
+        this.freezeMovement = false; // Unset general freeze
+        this.untexturedWarningShown = false; // Reset warning flag too
+        // No need to reset input here, Q is intentional
 
-        // Calculate target position
-        this.moveBackStartPosition.copy(this.playerModel.position);
-        this.moveBackTargetPosition.copy(this.playerModel.position).addScaledVector(direction, this.moveBackDistance);
-
-        // Store starting rotation
-        this.moveBackStartRotationY = this.playerModel.rotation.y; // <--- Store current rotation
-
-        // Start the move back state
-        this.isMovingBackFromChest = true;
-        this.moveBackTimer = 0;
-
-        // Hide message, keep frozen
         this.chestMessage.style.display = 'none';
-        // DO NOT unfreeze yet
-        // DO NOT show coords yet
-        // DO NOT clear interactingChestSet yet (might need it if Q is pressed again quickly?)
 
-        // Reset Q key state to prevent immediate re-trigger if held
-        this.input.keys.quit = false;
+        // Move player back slightly
+        const cameraForward = new THREE.Vector3();
+        this.camera.getWorldDirection(cameraForward);
+        const backwardVector = cameraForward.multiplyScalar(-100);
+        this.playerModel.position.add(backwardVector);
+
+        this.coordDisplay.style.display = 'block';
     }
 
-    // ... (creepy audio logic) ...
+
+    // Handle creepy audio proximity
+    if (this.cube010Mesh && this.playerModel) {
+      const distanceToCube = this.playerModel.position.distanceTo(this.cube010Mesh.position);
+      // ... (audio logic remains the same) ...
+    }
   }
   
   _updateCoordinateDisplay(characterStatus) {
@@ -1835,218 +1665,86 @@ class Game {
   }
 
   _updateChestPhysics(deltaTime) {
-      if (!this.chestSets || this.chestSets.length === 0) return;
+      // Use the Game's collisionMeshes list
+      if (!this.chestModel || !this.collisionMeshes || this.collisionMeshes.length === 0) {
+          // console.log("Skipping chest physics: No model or collision meshes.");
+          return;
+      }
 
-      // Get all mesh names that are chests to exclude them from ground check
-      const chestModelUUIDs = this.chestSets.map(set => set.chestModel.uuid);
+      this.chestModel.updateMatrixWorld(true); // Ensure matrix is current
 
-      for (let i = 0; i < this.chestSets.length; i++) { // Use index for orbiting check later
-          const set = this.chestSets[i];
-          const { chestModel } = set; // Destructure for easier access
-          chestModel.updateMatrixWorld(true); // Ensure matrix is current
+      // 1. Check Grounded State
+      const groundY = this._getGroundHeightBelowChest(this.chestModel.position);
 
-          // --- Skip physics if orbiting or explicitly ignored ---
-          // Note: Also check if the *current* chest index matches the orbitingChestIndex
-          if (set.ignorePhysics || i === this.orbitingChestIndex) {
-              // If ignoring physics (e.g., chest 1 or the orbiting chest 2),
-              // ensure its velocity is zeroed and it's marked grounded
-              // so it doesn't accidentally start falling later if the flag changes.
-              set.velocityY = 0;
-              set.isGrounded = true;
-              // We *don't* return here, because we still need _updateAllStarAndLightPositions
-              // continue; // Skip the rest of the loop for THIS chest set
+      if (groundY !== -Infinity) {
+          const targetY = groundY + this.chestHoverHeight;
+          const groundSnapThreshold = 5.0; // Increased threshold slightly
+
+          if (Math.abs(this.chestModel.position.y - targetY) < groundSnapThreshold ||
+             (this.chestModel.position.y > targetY && this.chestVelocityY <= 0))
+          {
+              if (!this.isChestGrounded) { // Snap only once when becoming grounded
+                 // console.log(`Chest grounded. Snapping from ${this.chestModel.position.y.toFixed(2)} to ${targetY.toFixed(2)}`);
+              this.chestModel.position.y = targetY;
+              }
+              this.chestVelocityY = 0;
+              this.isChestGrounded = true;
           } else {
-              // --- Perform physics ONLY if ignorePhysics is false AND it's not the orbiting chest ---
-              // 1. Check Grounded State
-              const groundY = this._getGroundHeightBelowChest(chestModel.position, chestModelUUIDs);
-    
-              if (groundY !== -Infinity) {
-                  const targetY = groundY + this.chestHoverHeight;
-                  const groundSnapThreshold = 5.0; 
-    
-                  if (Math.abs(chestModel.position.y - targetY) < groundSnapThreshold ||
-                     (chestModel.position.y > targetY && set.velocityY <= 0)) {
-                      if (!set.isGrounded) { 
-                          chestModel.position.y = targetY;
-                      }
-                      set.velocityY = 0;
-                      set.isGrounded = true;
-                  } else {
-                      set.isGrounded = false;
-                  }
-              } else {
-                  set.isGrounded = false;
-              }
-    
-              // 2. Apply Gravity if not Grounded
-              if (!set.isGrounded) {
-                  set.velocityY += this.chestGravity * deltaTime;
-                  set.velocityY = Math.max(set.velocityY, -20000); // Limit fall speed
-                  const deltaY = set.velocityY * deltaTime;
-                  chestModel.position.y += deltaY;
-    
-                  // Optional: Boundary check
-                  if (chestModel.position.y < -30000) {
-                     console.warn("A chest fell too far, resetting position near player.");
-                     if (this.playerModel) {
-                         chestModel.position.copy(this.playerModel.position).add(new THREE.Vector3(2000, 500, 0));
-                     } else {
-                         chestModel.position.set(0, 5000, 0); 
-                     }
-                     set.velocityY = 0;
-                     set.isGrounded = true; 
-                  }
-              }
-            // --- End Physics Calculation ---
+              this.isChestGrounded = false;
           }
-      } 
-      // Update star/light positions AFTER all chests have potentially moved (or stayed put)
-      this._updateAllStarAndLightPositions();
+      } else {
+          // No ground detected below
+          // console.log("Chest: No ground detected below.");
+          this.isChestGrounded = false;
+      }
+
+      // 2. Apply Gravity if not Grounded
+      if (!this.isChestGrounded) {
+          this.chestVelocityY += this.chestGravity * deltaTime;
+          this.chestVelocityY = Math.max(this.chestVelocityY, -20000); // Limit fall speed
+          const deltaY = this.chestVelocityY * deltaTime;
+          this.chestModel.position.y += deltaY;
+          // console.log(`Chest falling: velY=${this.chestVelocityY.toFixed(2)}, deltaY=${deltaY.toFixed(2)}, newY=${this.chestModel.position.y.toFixed(2)}`);
+
+          // Optional: Boundary check
+          if (this.chestModel.position.y < -30000) {
+             console.warn("Chest fell too far, resetting position near player.");
+             this.chestModel.position.copy(this.playerModel.position).add(new THREE.Vector3(2000, 500, 0));
+             this.chestVelocityY = 0;
+          }
+      }
+
+      // 3. Update Star and Light Position AFTER chest position is updated
+      this._updateStarAndLightPosition();
   }
 
-  _getGroundHeightBelowChest(chestPosition, chestUUIDsToIgnore) {
-      const rayOrigin = chestPosition.clone();
-      rayOrigin.y += 10; 
+  _getGroundHeightBelowChest(position) {
+      const rayOrigin = position.clone();
+      rayOrigin.y += 10; // Start ray slightly above
       this.chestRaycaster.set(rayOrigin, new THREE.Vector3(0, -1, 0));
-      this.chestRaycaster.far = chestPosition.y + 31000; 
+      this.chestRaycaster.far = position.y + 31000; // Limit ray distance based on current Y + fall limit
 
+      // Ensure collisionMeshes is populated
       if (!this.collisionMeshes || this.collisionMeshes.length === 0) return -Infinity;
 
-      // Exclude all chest models from the ground check
-      const meshesToCheck = this.collisionMeshes.filter(m => !chestUUIDsToIgnore.includes(m.uuid));
+      // Exclude chest itself if it somehow ended up in collisionMeshes
+      const meshesToCheck = this.collisionMeshes.filter(m => m !== this.chestModel);
 
-      const intersects = this.chestRaycaster.intersectObjects(meshesToCheck, true); 
+      const intersects = this.chestRaycaster.intersectObjects(meshesToCheck, true); // Recursive check
 
       if (intersects.length > 0) {
+          // Find the highest intersection point below the ray origin
           let highestY = -Infinity;
           for(const hit of intersects) {
+              // Ensure the hit point is below the origin's Y to avoid hitting things above
               if (hit.point.y < rayOrigin.y && hit.point.y > highestY) {
                   highestY = hit.point.y;
               }
           }
-          return highestY; 
+          return highestY; // Return the highest valid point found
       } else {
-          return -Infinity; 
+          return -Infinity; // No ground found
       }
-  }
-
-  // --- New Method to Add a Chest Instance ---
-  // Added scaleFactor parameter (defaults to 1 for no change)
-  // Added ignorePhysics parameter
-  _addChestInstance(position, rotationY = 0, scaleFactor = 1, ignorePhysics = false) { 
-    if (!this.baseChestScene) {
-        console.error("Base chest scene not loaded!");
-        return null;
-    }
-
-    // 1. Clone Chest Model
-    const chestModel = this.baseChestScene.clone(); 
-    chestModel.scale.set(500 * scaleFactor, 500 * scaleFactor, 500 * scaleFactor); 
-    chestModel.position.copy(position);
-    chestModel.rotation.y = rotationY;
-    this.scene.add(chestModel);
-
-    // 2. Create Star
-    const starShape = new THREE.Shape();
-    const points = 5, innerRadius = 20, outerRadius = 40;
-    starShape.moveTo(outerRadius, 0);
-    for (let i = 0; i < 2 * points; i++) {
-      const angle = (i * Math.PI) / points;
-      const radius = i % 2 === 0 ? outerRadius : innerRadius;
-      starShape.lineTo(Math.cos(angle) * radius, Math.sin(angle) * radius);
-    }
-    starShape.closePath();
-    const extrudeSettings = { depth: 1, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 5, bevelThickness: 5 };
-    const starGeometry = new THREE.ExtrudeGeometry(starShape, extrudeSettings);
-    const starMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFF00, specular: 0x111111, shininess: 1000 });
-    const starMesh = new THREE.Mesh(starGeometry, starMaterial);
-    starMesh.scale.set(4 * scaleFactor, 4 * scaleFactor, 4 * scaleFactor); 
-    starMesh.rotation.y = -Math.PI/4;
-    // Initial position will be corrected by _updateAllStarAndLightPositions immediately if called after adding chests
-    starMesh.position.set(position.x, position.y + (this.starYOffset * scaleFactor), position.z - (400 * scaleFactor)); // Set initial scaled position
-    this.scene.add(starMesh);
-
-    // 3. Create Star Light
-    // Adjust light distance based on scale factor so it covers the larger chest better
-    const lightDistance = 10000 * scaleFactor; 
-    const starLight = new THREE.PointLight(0xffc45d, 10.0, lightDistance, 2); 
-    starLight.castShadow = true;
-    starLight.position.copy(starMesh.position); // Match initial star position
-    this.scene.add(starLight);
-
-    // 4. Create Chest Set Object and Add to Array
-    const chestSet = {
-        chestModel: chestModel,
-        starMesh: starMesh,
-        starLight: starLight,
-        velocityY: 0,
-        isGrounded: ignorePhysics, // Start grounded if ignoring physics
-        scaleFactor: scaleFactor,
-        ignorePhysics: ignorePhysics // <-- Store the flag
-    };
-    this.chestSets.push(chestSet);
-    console.log(`Added chest instance at:`, position, ` Scale: ${scaleFactor}, IgnorePhysics: ${ignorePhysics}, Total chests: ${this.chestSets.length}`);
-
-    return chestSet; 
-  }
-  // --- End New Method ---
-
-  // Helper to update ALL star/light positions based on chests
-  _updateAllStarAndLightPositions() {
-      if (!this.chestSets || this.chestSets.length === 0) return;
-
-      for (const set of this.chestSets) {
-          // Retrieve the scale factor for this specific chest set
-          const scale = set.scaleFactor || 1; // Default to 1 if not set
-
-          // Calculate the position using the scaled offsets
-          set.starMesh.position.set(
-              set.chestModel.position.x,
-              set.chestModel.position.y + (this.starYOffset * scale), // Scale the Y offset
-              set.chestModel.position.z - (400 * scale) // Scale the Z offset
-          );
-          set.starLight.position.copy(set.starMesh.position);
-      }
-  }
-
-  // Add this new method within the Game class
-  _updateMoveBackFromChest(deltaTime) {
-    this.moveBackTimer += deltaTime;
-    // Use a smooth easing function for better visual appeal (optional)
-    // const progress = THREE.MathUtils.smootherstep(this.moveBackTimer / this.moveBackDuration, 0, 1); 
-    const progress = Math.min(this.moveBackTimer / this.moveBackDuration, 1.0); // Linear progress
-
-    // Interpolate player position
-    this.playerModel.position.lerpVectors(
-      this.moveBackStartPosition,
-      this.moveBackTargetPosition,
-      progress
-    );
-
-    // --- Add Rotation Interpolation ---
-    const targetRotationY = this.moveBackStartRotationY + this.moveBackTotalRotation;
-    this.playerModel.rotation.y = THREE.MathUtils.lerp(
-        this.moveBackStartRotationY,
-        targetRotationY,
-        progress
-    );
-    // --- End Rotation Interpolation ---
-
-    // Check for completion
-    if (progress >= 1.0) {
-      console.log("Finished moving back from chest. Resuming control.");
-      this.isMovingBackFromChest = false;
-      this.freezeMovement = false; 
-      this.interactingChestSet = null; 
-      this.characterParams.freezeMovement = false; 
-      this.cameraParams.freezeMovement = false;
-      this.coordDisplay.style.display = 'block'; 
-      
-      // Snap rotation back to camera orientation for smooth transition
-      this.playerModel.rotation.y = this.cameraController.theta; 
-      
-      this.input.resetMovementKeys(); 
-    }
   }
 }
 
