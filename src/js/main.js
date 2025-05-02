@@ -563,8 +563,8 @@ class Game {
     // --- Orbiting Light Variables ---
     this.orbitingLight = null;            // Reference to the orbiting light
     this.orbitCenter = new THREE.Vector3(0, 10000, 0); // Center of the orbit (can adjust Y)
-    this.orbitRadius = 25000;           // Radius of the orbit
-    this.orbitSpeed = 0.3;              // Speed of orbit (radians per second)
+    this.orbitRadius = 500000;           // Radius of the orbit - Increased from 25000
+    this.orbitSpeed = 1.0;              // Speed of orbit (radians per second) 
     // --- End Orbiting Light Variables ---
 
     // --- Chest Physics Variables ---
@@ -1015,7 +1015,8 @@ class Game {
     // Add a new PointLight instead, using the ambient light's color
     // Check if the light already exists (e.g., from a previous level load)
     if (!this.orbitingLight) {
-        this.orbitingLight = new THREE.PointLight(0xff00ff, 0.8, 50000); // Color 0xff00ff, intensity 0.8, range 50000
+        // Increased intensity from 0.8 to 1.5
+        this.orbitingLight = new THREE.PointLight(0xff00ff, 1.8, 5000000); // Color 0xff00ff, intensity 1.5, range 50000
         // this.orbitingLight.position.set(0, 10000, 0); // Remove static position setting
         this.orbitingLight.name = "replacementPointLight"; 
         // Optional: Configure shadows if needed (be mindful of performance)
@@ -1027,9 +1028,10 @@ class Game {
         }
     }
 
-
+    // --- Disable the Directional Light ---
+     
     // Keep the Directional Light
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.01);
     directionalLight.position.set(50, 100, -50); // Adjust position as needed
     directionalLight.castShadow = true;
     
@@ -1054,9 +1056,12 @@ class Game {
        // const shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
        // this.scene.add(shadowHelper);
      }
+    
+    // --- End Disable the Directional Light ---
 
 
     // Enable shadows in renderer (usually done once)
+    // Note: Shadows will now only be cast by starLight (since orbitingLight.castShadow is false)
     this.renderer.instance.shadowMap.enabled = true;
     this.renderer.instance.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
   }
