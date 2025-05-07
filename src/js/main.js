@@ -519,8 +519,10 @@ class Game {
     this.initialized = false;
     this.freezeMovement = false;
     this.untexturedMeshes = [];
-    this.untexturedWarningShown = false;
-    this.frozenByUntexturedWarning = false;
+    this.untexturedWarningShown = false; // Tracks if the warning has been shown *since last moving away*
+    this.frozenByUntexturedWarning = false; // Tracks if movement is currently frozen *because* of the warning display
+    this.warningDisplayTimer = 0; // Timer for how long the warning message is shown
+    this.warningDisplayDuration = 2.5; // How long the warning message stays visible (seconds)
     this.tempBox = new THREE.Box3();
     this.playerBox = new THREE.Box3();
     this.collisionMeshes = [];
@@ -535,7 +537,9 @@ class Game {
     this.cenitalCameraAnimationTimer = 0;
     this.cenitalCameraAnimationDuration = 1.5; // Keep previous change
     this.deathDelayTimer = 0;
-    this.deathDelayDuration = 3.0; // Keep previous change
+    this.deathDelayDuration = 3.0; // Time camera stays cenital BEFORE showing message
+    this.deathMessageIsVisible = false; // Flag to track if the death message is shown
+    this.deathMessageDisplayDuration = 3.0; // How long the death message stays BEFORE reload
     this.initialDeathPlayerPosition = new THREE.Vector3();
     this.initialDeathXRotation = 0;
     this.targetDeathXRotation = 0;
@@ -630,6 +634,8 @@ class Game {
     // UI elements
     this.coordDisplay = this._createCoordinateDisplay();
     this.chestMessage = this._createChestMessage();
+    this.deathMessage = this._createDeathMessage();
+    this.warningMessage = this._createWarningMessage(); // <-- Create warning message element
 
     // Load models and initialize the game
     this._initializeGame();
@@ -1258,12 +1264,12 @@ class Game {
           frameFreeze = true;
       } else if (this.isTeleportingFreeze) {
           frameFreeze = true;
-      } else if (this.isMovingBackFromChest) { // <--- Add check for new state
+      } else if (this.isMovingBackFromChest) {
           frameFreeze = true;
-      } else if (this.frozenByUntexturedWarning) {
+      } else if (this.frozenByUntexturedWarning) { // <--- Add check for warning freeze
           frameFreeze = true;
       } else {
-          frameFreeze = this.freezeMovement;
+          frameFreeze = this.freezeMovement; // General flag if no specific state applies
       }
 
       // Update controller params based on calculated freeze state
@@ -1281,47 +1287,49 @@ class Game {
       }
       // --- End Player Bounding Box Update ---
 
-      // --- Handle State Updates (Death, Teleport, MoveBack Phases) ---
+      // --- Handle State Updates (Death, Teleport, MoveBack, Warning Phases) --- // <-- Added Warning
       // NOTE: Order matters here. Check most critical/overriding states first.
       if (this.isDyingPhase1) {
         this._updateDeathAnimationPhase1(deltaTime);
-        // Update chests even during death anim? Maybe.
         this._updateChestPhysics(deltaTime); 
-        this.renderer.instance.render(this.scene, this.camera); // Render death anim
+        this.renderer.instance.render(this.scene, this.camera);
         return;
       } else if (this.isMovingCameraToCenital) {
         this._updateCenitalCameraAnimation(deltaTime);
         this._updateChestPhysics(deltaTime);
-        this.renderer.instance.render(this.scene, this.camera); // Render cam move
+        this.renderer.instance.render(this.scene, this.camera);
         return;
       } else if (this.isWaitingForDeathReload) {
         this._updateDeathDelay(deltaTime);
         this._updateChestPhysics(deltaTime);
-        this.renderer.instance.render(this.scene, this.camera); // Render final frame
+        this.renderer.instance.render(this.scene, this.camera);
         return;
       } else if (this.isPreTeleportLock) { 
           this._updatePreTeleportLock(deltaTime); 
           this._updateChestPhysics(deltaTime);
           if (this.mixer) this.mixer.update(deltaTime);
           this.chestSets.forEach(set => { if(set.starMesh) set.starMesh.rotation.y += this.starRotationSpeed * deltaTime; });
-          this._updateCoordinateDisplay(this.character.Update(0, this.input, this.cameraController.theta)); // Get status
+          this._updateCoordinateDisplay(this.character.Update(0, this.input, this.cameraController.theta));
           this.renderer.instance.render(this.scene, this.camera); 
           return; 
       } else if (this.isTeleportingFreeze) { 
         this._updateTeleportFreeze(deltaTime); 
         this._updateChestPhysics(deltaTime);
-        this.renderer.instance.render(this.scene, this.camera); // Render frozen frame
+        this.renderer.instance.render(this.scene, this.camera);
         return; 
-      } else if (this.isMovingBackFromChest) { // <--- Add call to new update function
+      } else if (this.isMovingBackFromChest) {
           this._updateMoveBackFromChest(deltaTime);
-          // Update chests while moving back? Seems reasonable.
           this._updateChestPhysics(deltaTime); 
-          // Update animations? Yes.
           if (this.mixer) this.mixer.update(deltaTime); 
           this.chestSets.forEach(set => { if(set.starMesh) set.starMesh.rotation.y += this.starRotationSpeed * deltaTime; });
-          // Update coords (shows fixed coords during move back)? Maybe not needed.
-          // this._updateCoordinateDisplay(...); 
-          this.renderer.instance.render(this.scene, this.camera); // Render the backward movement
+          this.renderer.instance.render(this.scene, this.camera);
+          return;
+      } else if (this.frozenByUntexturedWarning) { // <--- Add call to new warning update function
+          this._updateWarningDisplay(deltaTime);
+          // Warning display is short, maybe still update chests/stars? Optional.
+          this._updateChestPhysics(deltaTime);
+          this.chestSets.forEach(set => { if(set.starMesh) set.starMesh.rotation.y += this.starRotationSpeed * deltaTime; });
+          this.renderer.instance.render(this.scene, this.camera); // Render with warning showing
           return; // Exit here for this frame
       }
       // --- End State Updates ---
@@ -1418,7 +1426,7 @@ class Game {
       // ***** END: Add Y-Axis Death Check *****
 
       // Handle proximity events (Collision-based death check is still here)
-      this._handleProximityEvents();
+      this._handleProximityEvents(); // This might set frozenByUntexturedWarning for the *next* frame
 
       // Update coordinate display
       this._updateCoordinateDisplay(characterStatus);
@@ -1585,27 +1593,38 @@ class Game {
     }
   }
 
-  // New method for Phase 3: Delay before game over
+  // New method for Phase 3: Delay, show message, then reload
   _updateDeathDelay(deltaTime) {
     this.deathDelayTimer += deltaTime;
 
     // Ensure camera stays put and looks down during delay
     this.camera.position.copy(this.targetCameraCenitalPosition);
     this.camera.quaternion.copy(this.targetCameraCenitalQuaternion);
-    // this.camera.lookAt(this.finalPlayerPosition); // Redundant if quat is correct
 
-    if (this.deathDelayTimer >= this.deathDelayDuration) {
-        console.log("Death Phase 3 complete. Game Over.");
-        this.isWaitingForDeathReload = false; // End phase 3
-        alert("You died :(");
-        window.location.reload();
+    if (!this.deathMessageIsVisible) {
+        // Phase 3a: Wait before showing the message
+        if (this.deathDelayTimer >= this.deathDelayDuration) {
+            console.log("Death Phase 3a complete. Showing death message.");
+            this.deathMessage.style.display = 'block'; // Show the styled message
+            this.deathMessageIsVisible = true;         // Set flag
+            this.deathDelayTimer = 0;                  // Reset timer for the next phase
+        }
+    } else {
+        // Phase 3b: Wait while the message is displayed
+        if (this.deathDelayTimer >= this.deathMessageDisplayDuration) {
+            console.log("Death Phase 3b complete. Reloading game.");
+            this.isWaitingForDeathReload = false; // End the overall waiting state
+            // No need to hide the message, page will reload
+            window.location.reload();
+        }
     }
   }
 
   _handleProximityEvents() {
     // Exit early if any death, pre-teleport, or teleport freeze is active
     // OR if we are currently moving back from a chest
-    if (this.isDyingPhase1 || this.isMovingCameraToCenital || this.isWaitingForDeathReload || this.isPreTeleportLock || this.isTeleportingFreeze || this.isMovingBackFromChest) return;
+    // OR if we are currently showing the warning message (frozenByUntexturedWarning is true)
+    if (this.isDyingPhase1 || this.isMovingCameraToCenital || this.isWaitingForDeathReload || this.isPreTeleportLock || this.isTeleportingFreeze || this.isMovingBackFromChest || this.frozenByUntexturedWarning) return; // <--- Added warning freeze check
 
     // --- Teleport Collision Check ---
     if (this.columpioMesh && this.playerModel && !this.freezeMovement) { // Check general freeze flag too
@@ -1634,38 +1653,40 @@ class Game {
     const warningProximityThreshold = 100000;
 
     // Handle Untextured Mesh Collision (Death Trigger) and Proximity (Warning)
-    if (this.playerModel && this.untexturedMeshes.length > 0 && !this.freezeMovement) {
+    if (this.playerModel && this.untexturedMeshes.length > 0 /* removed !this.freezeMovement check here */) {
+        // Check distance even if general freeze is on, but death/teleport overrides take priority above
+
         for (const mesh of this.untexturedMeshes) {
             if (mesh && mesh.geometry) {
                  mesh.updateMatrixWorld(true);
                  this.tempBox.setFromObject(mesh, true);
 
                  // --- 1. Check for Collision (Death) ---
+                 // Collision check should happen even if frozen by warning (e.g., player slides into it)
                  if (this.playerBox.intersectsBox(this.tempBox)) {
-                     // --- Call the refactored method ---
                      this._initiateDeathSequence("Collision with untextured mesh");
-                     // --- End Call ---
                      return; // Exit proximity checks
                  }
 
                  // --- 2. Check for Proximity (Warning) ---
+                 // Only trigger warning if NOT already frozen for other reasons
+                 if (!this.freezeMovement) { // Check general freeze *here* for warning trigger only
                  const distance = this.tempBox.distanceToPoint(this.playerModel.position);
                  if (distance < warningProximityThreshold) {
                     isNearUntexturedForWarning = true;
+                        // Trigger the warning display *only if* it hasn't been shown since the player last moved away
                     if (!this.untexturedWarningShown) {
                         console.log("Near untextured, freezing movement for warning.");
                         this.freezeMovement = true; // Set general freeze
-                        this.frozenByUntexturedWarning = true; // Mark as warning freeze
-                        this.characterParams.freezeMovement = true;
-                        this.cameraParams.freezeMovement = true;
+                            this.frozenByUntexturedWarning = true; // Mark as warning freeze specifically
+                            this.warningMessage.style.display = 'block'; // Show the styled message
+                            this.untexturedWarningShown = true; // Mark warning as shown (for this approach)
+                            this.warningDisplayTimer = 0; // Reset the timer for the display duration
+                            this.input.resetMovementKeys(); // Prevent held keys carrying over
 
-                        alert("WARNING! Getting closer..."); // Blocking alert
-
-                        console.log("Alert dismissed, unfreezing movement and resetting input.");
-                        this.freezeMovement = false; // Unset general freeze
-                        this.frozenByUntexturedWarning = false; // Unset warning marker
-                        this.untexturedWarningShown = true; // Mark warning as shown
-                        this.input.resetMovementKeys(); // Reset keys after freeze ends
+                            // Exit proximity checks for this frame as we just triggered the warning
+                            return;
+                        }
                     }
                  }
             }
@@ -1673,13 +1694,14 @@ class Game {
     }
 
     // Reset the *warning* 'shown' flag logic
-    if (!isNearUntexturedForWarning && this.untexturedWarningShown && !this.frozenByUntexturedWarning && !this.isDyingPhase1 && !this.isPreTeleportLock && !this.isTeleportingFreeze) {
+    // Reset if player is *not* near any untextured mesh AND the warning isn't currently being displayed
+    if (!isNearUntexturedForWarning && !this.frozenByUntexturedWarning && this.untexturedWarningShown) {
              console.log("Away from all untextured meshes (for warning), resetting shown flag.");
              this.untexturedWarningShown = false;
     }
 
 
-    // --- Handle chest proximity (loop through all chests) ---
+    // --- Handle chest proximity ---
     let isNearAnyChest = false;
     let nearbyChestSet = null; // Temporary variable to find the nearest chest this frame
 
@@ -1742,6 +1764,26 @@ class Game {
     // ... (creepy audio logic) ...
   }
   
+  // +++ New Method: Update Warning Message Display Timer +++
+  _updateWarningDisplay(deltaTime) {
+    this.warningDisplayTimer += deltaTime;
+    // console.log(`Warning display timer: ${this.warningDisplayTimer.toFixed(2)} / ${this.warningDisplayDuration}`); // Optional debug log
+
+    // Ensure movement remains frozen (handled by frameFreeze in game loop)
+
+    if (this.warningDisplayTimer >= this.warningDisplayDuration) {
+        console.log("Warning display finished. Hiding message and unfreezing.");
+        this.warningMessage.style.display = 'none'; // Hide the message
+        this.freezeMovement = false; // Unset general freeze
+        this.frozenByUntexturedWarning = false; // Unset the specific warning freeze flag
+
+        // Reset keys AFTER freeze ends, in case player was holding movement keys
+        this.input.resetMovementKeys();
+    }
+    // Rendering happens in the main loop branch that calls this function
+  }
+  // +++ End New Method +++
+  
   _updateCoordinateDisplay(characterStatus) {
     if (!this.coordDisplay || !this.playerModel) return;
     
@@ -1796,9 +1838,34 @@ class Game {
       padding: 20px;
       border-radius: 10px;
       display: none;
-      z-index: 1001;
+      z-index: 1001; /* Chest message higher than coords */
     `;
     div.textContent = "Wow! A chest! I wonder what's inside";
+    document.body.appendChild(div);
+    return div;
+  }
+
+  // New method to create the death message element
+  _createDeathMessage() {
+    const div = document.createElement('div');
+    div.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: red; /* Changed color */
+      font-family: Arial, sans-serif;
+      font-size: 3em; /* Made text larger */
+      font-weight: bold;
+      text-align: center;
+      background: rgba(0,0,0,0.9); /* Made background darker */
+      padding: 30px;
+      border: 2px solid darkred; /* Added border */
+      border-radius: 10px;
+      display: none;
+      z-index: 1002; /* Ensure death message is on top */
+    `;
+    div.textContent = "you died :("; // Changed text
     document.body.appendChild(div);
     return div;
   }
@@ -2057,6 +2124,32 @@ class Game {
 
     this.deathAnimationTimer = 0; // Reset timer
   }
+
+  // +++ New Method: Create Warning Message Element +++
+  _createWarningMessage() {
+    const div = document.createElement('div');
+    div.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: orange; /* Warning color */
+      font-family: Arial, sans-serif;
+      font-size: 2.0em; /* Slightly smaller than death */
+      font-weight: bold;
+      text-align: center;
+      background: rgba(30, 10, 0, 0.85); /* Dark orange/brown background */
+      padding: 25px;
+      border: 2px solid darkorange;
+      border-radius: 8px;
+      display: none;
+      z-index: 1001; /* Same level as chest, below death */
+    `;
+    div.textContent = "WARNING! Getting closer..."; // Set text
+    document.body.appendChild(div);
+    return div;
+  }
+  // +++ End New Method +++
 }
 
 // Start the game when DOM is loaded

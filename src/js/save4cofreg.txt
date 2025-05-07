@@ -1247,11 +1247,10 @@ class Game {
   _startGameLoop() {
     const frame = () => {
       requestAnimationFrame(frame);
-      
+
       if (!this.initialized) return;
-      
+
       // --- Update shared freezeMovement status ---
-      // Prioritize freeze states: Death > PreTeleport > Teleport > MoveBack > Untextured Warning > Manual Freeze
       let frameFreeze = false;
       if (this.isDyingPhase1 || this.isMovingCameraToCenital || this.isWaitingForDeathReload) {
           frameFreeze = true;
@@ -1271,7 +1270,6 @@ class Game {
       this.characterParams.freezeMovement = frameFreeze;
       this.cameraParams.freezeMovement = frameFreeze;
       // --- End Update Freeze Status ---
-
 
       const deltaTime = this.clock.getDelta();
       this.time += deltaTime;
@@ -1330,7 +1328,6 @@ class Game {
 
 
       // --- Regular Updates (only run if not frozen/in special state) ---
-      // These only run if none of the above if/else if conditions were met.
 
       // --- Update Orbiting Light ---
       if (this.orbitingLight) {
@@ -1358,16 +1355,9 @@ class Game {
       */
       // --- End Update Player Head Light Position ---
       
-      // --- Update Camera FIRST to get theta for the character ---
-      // !!! THIS WAS THE INCORRECT PLACEMENT - REMOVE FROM HERE !!!
-      // const cameraTheta = this.cameraController.Update(deltaTime, this.input);
-      
       // --- Update Character ---
-      // Pass the *current* camera theta, which might be slightly off if camera hasn't updated yet,
-      // but camera needs the LATEST character position anyway. We'll update camera AFTER character.
-      const characterStatus = this.character.Update(deltaTime, this.input, this.cameraController.theta); // Use existing theta for now
+      const characterStatus = this.character.Update(deltaTime, this.input, this.cameraController.theta);
       // --- End Update Character ---
-
 
       // --- Update Orbiting Chest Position ---
       // Check if the orbitingLight exists and the player model exists (for freeze check)
@@ -1404,7 +1394,7 @@ class Game {
         }
       });
 
-      // --- Update Camera AFTER Character and Orbiting Chest ---
+      // --- Update Camera AFTER Character ---
       // Now the camera updates based on the character's NEW position for this frame.
       // The character used the previous frame's theta for movement, which is generally okay.
       const cameraTheta = this.cameraController.Update(deltaTime, this.input); 
@@ -1416,8 +1406,19 @@ class Game {
           this.modelCenter.copy(this.playerModel.position);
       }
 
-      // Handle proximity events
-      this._handleProximityEvents(); 
+      // ***** START: Add Y-Axis Death Check *****
+      const Y_DEATH_THRESHOLD = 13500;
+      if (!frameFreeze // Only check if not already frozen/dying/etc.
+          && this.currentLevelPath && this.currentLevelPath.endsWith('nivel1.glb')
+          && this.playerModel && this.playerModel.position.y >= Y_DEATH_THRESHOLD)
+      {
+          this._initiateDeathSequence(`Reached Y threshold (${this.playerModel.position.y.toFixed(0)}) in nivel1.glb`);
+          // The loop will exit via the isDyingPhase1 check on the next frame
+      }
+      // ***** END: Add Y-Axis Death Check *****
+
+      // Handle proximity events (Collision-based death check is still here)
+      this._handleProximityEvents();
 
       // Update coordinate display
       this._updateCoordinateDisplay(characterStatus);
@@ -1425,7 +1426,7 @@ class Game {
       // Final Render
       this.renderer.instance.render(this.scene, this.camera);
     };
-    
+
     frame();
   }
 
@@ -1641,41 +1642,9 @@ class Game {
 
                  // --- 1. Check for Collision (Death) ---
                  if (this.playerBox.intersectsBox(this.tempBox)) {
-                     console.log("Player collided with untextured mesh! Triggering death phase 1.");
-                     this.isDyingPhase1 = true;
-                     this.freezeMovement = true; // General freeze
-                     this.frozenByUntexturedWarning = false; // Not the warning freeze
-                     this.characterParams.freezeMovement = true;
-                     this.cameraParams.freezeMovement = true;
-                     this.input.resetMovementKeys();
-    
-                     // --- Capture Initial State ---
-                     this.initialDeathPlayerPosition.copy(this.playerModel.position);
-                     this.initialDeathXRotation = this.playerModel.rotation.x;
-                     this.initialCameraPosition.copy(this.camera.position); // Already done
-                     this.initialCameraQuaternion.copy(this.camera.quaternion); // <-- Capture initial quaternion
-    
-                     // --- Calculate Target State for Phase 1 ---
-                     this.targetDeathXRotation = this.initialDeathXRotation + Math.PI / 2;
-                     this.targetDeathYPosition = this.initialDeathPlayerPosition.y - 1000; // Example downward movement
-    
-                     // Calculate a reasonable target position for the camera in phase 1
-                     // (Example: slightly further back and higher than initial)
-                     const offset = new THREE.Vector3(0, 1500, -2000); // Adjust as needed
-                     this.targetCameraPositionPhase1.copy(this.initialDeathPlayerPosition).add(offset);
-    
-                     // Calculate the target rotation for Phase 1 (looking at initial death position)
-                     const tempMatrix = new THREE.Matrix4();
-                     tempMatrix.lookAt(
-                         this.targetCameraPositionPhase1,    // Eye position
-                         this.initialDeathPlayerPosition,    // Target position to look at
-                         this.camera.up                     // Up vector (usually (0, 1, 0))
-                     );
-                     this.targetCameraQuaternionPhase1.setFromRotationMatrix(tempMatrix); // <-- Calculate target quaternion
-                     // --- End Calculate Target State ---
-    
-                     this.deathAnimationTimer = 0; // Reset timer
-    
+                     // --- Call the refactored method ---
+                     this._initiateDeathSequence("Collision with untextured mesh");
+                     // --- End Call ---
                      return; // Exit proximity checks
                  }
 
@@ -2047,6 +2016,46 @@ class Game {
       
       this.input.resetMovementKeys(); 
     }
+  }
+
+  _initiateDeathSequence(reason) {
+    console.log(`Initiating death sequence. Reason: ${reason}`);
+
+    this.isDyingPhase1 = true;
+    this.freezeMovement = true; // General freeze
+    this.frozenByUntexturedWarning = false; // Ensure this isn't set
+    this.characterParams.freezeMovement = true; // Update controller params
+    this.cameraParams.freezeMovement = true;
+    this.input.resetMovementKeys();
+
+    // --- Capture Initial State ---
+    this.initialDeathPlayerPosition.copy(this.playerModel.position);
+    this.initialDeathXRotation = this.playerModel.rotation.x;
+    this.initialCameraPosition.copy(this.camera.position);
+    this.initialCameraQuaternion.copy(this.camera.quaternion);
+
+    // --- Calculate Target State for Phase 1 ---
+    this.targetDeathXRotation = this.initialDeathXRotation + Math.PI / 2;
+    // Make the player fall slightly more visibly from a height death
+    this.targetDeathYPosition = this.initialDeathPlayerPosition.y - (reason.includes("Y threshold") ? 3000 : 1000);
+
+    // Calculate a reasonable target position for the camera in phase 1
+    // (Example: slightly further back and higher than initial)
+    // Keep the same offset logic for now, adjust if needed
+    const offset = new THREE.Vector3(0, 1500, -2000);
+    this.targetCameraPositionPhase1.copy(this.initialDeathPlayerPosition).add(offset);
+
+    // Calculate the target rotation for Phase 1 (looking at initial death position)
+    const tempMatrix = new THREE.Matrix4();
+    tempMatrix.lookAt(
+        this.targetCameraPositionPhase1,    // Eye position
+        this.initialDeathPlayerPosition,    // Target position to look at
+        this.camera.up                     // Up vector (usually (0, 1, 0))
+    );
+    this.targetCameraQuaternionPhase1.setFromRotationMatrix(tempMatrix);
+    // --- End Calculate Target State ---
+
+    this.deathAnimationTimer = 0; // Reset timer
   }
 }
 
