@@ -74,6 +74,298 @@ class InputController {
   }
 }
 
+class TouchInputController {
+  constructor() {
+    this.keys = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+      space: false,
+      shift: false,
+      quit: false // For chest interaction
+    };
+    this.cameraRotation = {
+      left: false,
+      right: false,
+      up: false,
+      down: false
+    };
+    this.touchStates = {}; // To track individual touches
+
+    this._createControls();
+    this._Initialize();
+  }
+
+  _createControls() {
+    // Create a container for all touch controls
+    this.controlsContainer = document.createElement('div');
+    this.controlsContainer.style.cssText = `
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 200px; /* Adjust height as needed */
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 20px;
+      box-sizing: border-box;
+      z-index: 1003; /* Above other UI elements */
+      pointer-events: none; /* Container itself doesn't block touches */
+    `;
+    document.body.appendChild(this.controlsContainer);
+
+    // --- Left side: Movement Joystick (Simplified as D-pad for now) ---
+    this.movementPad = document.createElement('div');
+    this.movementPad.style.cssText = `
+      display: grid;
+      grid-template-columns: repeat(3, 50px);
+      grid-template-rows: repeat(3, 50px);
+      gap: 5px;
+      pointer-events: auto; /* Enable pointer events for this element */
+    `;
+    this.controlsContainer.appendChild(this.movementPad);
+
+    const createButton = (text, gridArea, actionKey, isMovement = true) => {
+      const button = document.createElement('button');
+      button.textContent = text;
+      button.style.cssText = `
+        grid-area: ${gridArea};
+        background-color: rgba(100, 100, 100, 0.7);
+        color: white;
+        border: 1px solid white;
+        border-radius: 5px;
+        font-size: 1.5em;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        touch-action: manipulation; /* Prevents zooming/scrolling on touch */
+      `;
+      button.dataset.actionKey = actionKey;
+      if (isMovement) {
+        this.movementPad.appendChild(button);
+      } else {
+        this.actionButtonsContainer.appendChild(button);
+      }
+      return button;
+    };
+
+    // D-pad buttons
+    this.btnForward = createButton('↑', '1 / 2 / 2 / 3', 'forward');
+    this.btnLeft = createButton('←', '2 / 1 / 3 / 2', 'left');
+    this.btnBackward = createButton('↓', '3 / 2 / 4 / 3', 'backward');
+    this.btnRight = createButton('→', '2 / 3 / 3 / 4', 'right');
+
+
+    // --- Right side: Action Buttons & Camera Control ---
+    this.rightControlsContainer = document.createElement('div');
+    this.rightControlsContainer.style.cssText = `
+      display: flex;
+      flex-direction: column; /* Stack action buttons and camera controls */
+      align-items: flex-end; /* Align to the right */
+      gap: 10px;
+      pointer-events: auto;
+    `;
+    this.controlsContainer.appendChild(this.rightControlsContainer);
+    
+    // Action Buttons Container (Jump, Shift, Quit)
+    this.actionButtonsContainer = document.createElement('div');
+    this.actionButtonsContainer.style.cssText = `
+        display: flex;
+        flex-direction: row; /* Action buttons in a row */
+        gap: 10px;
+        pointer-events: auto;
+    `;
+    this.rightControlsContainer.appendChild(this.actionButtonsContainer);
+
+    // Action Buttons
+    this.btnJump = createButton('JMP', '', 'space', false);
+    this.btnShift = createButton('RUN', '', 'shift', false);
+    this.btnQuit = createButton('Q', '', 'quit', false); // For chest
+
+    // Camera Control Pad (similar to movement D-pad)
+    this.cameraPad = document.createElement('div');
+    this.cameraPad.style.cssText = `
+      display: grid;
+      grid-template-columns: repeat(3, 40px); /* Smaller camera buttons */
+      grid-template-rows: repeat(3, 40px);
+      gap: 3px;
+      pointer-events: auto;
+    `;
+    this.rightControlsContainer.appendChild(this.cameraPad); // Add to right controls
+
+    const createCameraButton = (text, gridArea, rotationKey) => {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.style.cssText = `
+            grid-area: ${gridArea};
+            background-color: rgba(100, 100, 100, 0.7);
+            color: white;
+            border: 1px solid white;
+            border-radius: 5px;
+            font-size: 1.2em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation;
+        `;
+        button.dataset.rotationKey = rotationKey;
+        this.cameraPad.appendChild(button);
+        return button;
+    };
+
+    this.btnCamUp = createCameraButton('↑', '1 / 2 / 2 / 3', 'up');
+    this.btnCamLeft = createCameraButton('←', '2 / 1 / 3 / 2', 'right'); // ArrowLeft for camera right
+    this.btnCamDown = createCameraButton('↓', '3 / 2 / 4 / 3', 'down');
+    this.btnCamRight = createCameraButton('→', '2 / 3 / 3 / 4', 'left'); // ArrowRight for camera left
+  }
+
+  _Initialize() {
+    document.addEventListener('touchstart', (e) => this._onTouchStart(e), { passive: false });
+    document.addEventListener('touchend', (e) => this._onTouchEnd(e), { passive: false });
+    document.addEventListener('touchmove', (e) => this._onTouchMove(e), { passive: false }); // Optional for joystick
+    document.addEventListener('touchcancel', (e) => this._onTouchEnd(e), { passive: false }); // Treat cancel like end
+  }
+
+  _handleTouchEvent(event, isStart) {
+    event.preventDefault(); // Prevent default touch behaviors like scrolling or zooming
+    for (let i = 0; i < event.changedTouches.length; i++) {
+      const touch = event.changedTouches[i];
+      const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+
+      if (targetElement) {
+        const actionKey = targetElement.dataset.actionKey;
+        const rotationKey = targetElement.dataset.rotationKey;
+
+        if (actionKey) {
+          if (isStart) {
+            this.keys[actionKey] = true;
+            this.touchStates[touch.identifier] = { type: 'key', key: actionKey, element: targetElement };
+             targetElement.style.backgroundColor = 'rgba(150, 150, 150, 0.9)'; // Highlight
+          } else {
+            // Only deactivate if this specific touch was responsible
+            if (this.touchStates[touch.identifier] && this.touchStates[touch.identifier].key === actionKey) {
+              this.keys[actionKey] = false;
+              delete this.touchStates[touch.identifier];
+              targetElement.style.backgroundColor = 'rgba(100, 100, 100, 0.7)'; // Unhighlight
+            }
+          }
+        } else if (rotationKey) {
+          if (isStart) {
+            this.cameraRotation[rotationKey] = true;
+            this.touchStates[touch.identifier] = { type: 'rotation', key: rotationKey, element: targetElement };
+            targetElement.style.backgroundColor = 'rgba(150, 150, 150, 0.9)'; // Highlight
+          } else {
+             if (this.touchStates[touch.identifier] && this.touchStates[touch.identifier].key === rotationKey) {
+                this.cameraRotation[rotationKey] = false;
+                delete this.touchStates[touch.identifier];
+                targetElement.style.backgroundColor = 'rgba(100, 100, 100, 0.7)'; // Unhighlight
+             }
+          }
+        }
+      }
+    }
+  }
+
+  _onTouchStart(event) {
+    this._handleTouchEvent(event, true);
+  }
+
+  _onTouchEnd(event) {
+    this._handleTouchEvent(event, false);
+    // Ensure any keys associated with lifted touches are released
+    // This is a safety net for touches that might have moved off their original button
+    for (let i = 0; i < event.changedTouches.length; i++) {
+        const touchId = event.changedTouches[i].identifier;
+        const state = this.touchStates[touchId];
+        if (state) {
+            if (state.type === 'key') this.keys[state.key] = false;
+            if (state.type === 'rotation') this.cameraRotation[state.key] = false;
+            if (state.element) state.element.style.backgroundColor = 'rgba(100, 100, 100, 0.7)';
+            delete this.touchStates[touchId];
+        }
+    }
+  }
+  
+  _onTouchMove(event) {
+    event.preventDefault();
+    for (let i = 0; i < event.changedTouches.length; i++) {
+        const touch = event.changedTouches[i];
+        const currentElement = document.elementFromPoint(touch.clientX, touch.clientY);
+        const previousState = this.touchStates[touch.identifier];
+
+        if (previousState && previousState.element !== currentElement) {
+            // Touch has moved off the original button
+            if (previousState.type === 'key') this.keys[previousState.key] = false;
+            if (previousState.type === 'rotation') this.cameraRotation[previousState.key] = false;
+            if (previousState.element) previousState.element.style.backgroundColor = 'rgba(100, 100, 100, 0.7)';
+            // Do not delete touchState yet, new element will be handled below
+        }
+        
+        // Treat as new touch start on current element if it's a button
+        if (currentElement) {
+            const actionKey = currentElement.dataset.actionKey;
+            const rotationKey = currentElement.dataset.rotationKey;
+
+            if (actionKey) {
+                this.keys[actionKey] = true;
+                if (previousState && previousState.element !== currentElement) { // update if moved from another button
+                    delete this.touchStates[touch.identifier];
+                }
+                this.touchStates[touch.identifier] = { type: 'key', key: actionKey, element: currentElement };
+                currentElement.style.backgroundColor = 'rgba(150, 150, 150, 0.9)';
+            } else if (rotationKey) {
+                this.cameraRotation[rotationKey] = true;
+                 if (previousState && previousState.element !== currentElement) {
+                    delete this.touchStates[touch.identifier];
+                }
+                this.touchStates[touch.identifier] = { type: 'rotation', key: rotationKey, element: currentElement };
+                currentElement.style.backgroundColor = 'rgba(150, 150, 150, 0.9)';
+            } else if (previousState) { 
+                // Moved off a button to a non-button area, effectively a touchend for the previous button
+                if (previousState.type === 'key') this.keys[previousState.key] = false;
+                if (previousState.type === 'rotation') this.cameraRotation[previousState.key] = false;
+                if (previousState.element) previousState.element.style.backgroundColor = 'rgba(100, 100, 100, 0.7)';
+                delete this.touchStates[touch.identifier];
+            }
+        } else if (previousState) {
+            // Moved off screen or to an element with no dataset
+            if (previousState.type === 'key') this.keys[previousState.key] = false;
+            if (previousState.type === 'rotation') this.cameraRotation[previousState.key] = false;
+            if (previousState.element) previousState.element.style.backgroundColor = 'rgba(100, 100, 100, 0.7)';
+            delete this.touchStates[touch.identifier];
+        }
+    }
+  }
+
+  resetMovementKeys() {
+    console.log("Resetting movement keys in TouchInputController.");
+    this.keys.forward = false;
+    this.keys.backward = false;
+    this.keys.left = false;
+    this.keys.right = false;
+    // For touch, it's safer to reset all on significant game events
+    // this.keys.space = false;
+    // this.keys.shift = false;
+    // this.keys.quit = false; // Q is used for chest
+  }
+
+  // Method to remove controls when game ends or view changes
+  destroyControls() {
+    if (this.controlsContainer) {
+      this.controlsContainer.remove();
+      this.controlsContainer = null;
+    }
+    // Remove event listeners - important to prevent memory leaks
+    document.removeEventListener('touchstart', this._onTouchStart);
+    document.removeEventListener('touchend', this._onTouchEnd);
+    document.removeEventListener('touchmove', this._onTouchMove);
+    document.removeEventListener('touchcancel', this._onTouchEnd);
+    console.log("Touch controls destroyed.");
+  }
+}
+
 class ThirdPersonCamera {
   constructor(params) {
     this.params = params;
@@ -514,8 +806,9 @@ class CharacterController {
 }
 
 class Game {
-  constructor(muted = false) {
+  constructor(muted = false, isMobile = false) { // Added isMobile flag
     this.isMuted = muted;
+    this.isMobile = isMobile; // Store the mobile flag
     this.initialized = false;
     this.freezeMovement = false;
     this.untexturedMeshes = [];
@@ -1162,7 +1455,13 @@ class Game {
 
   
   _setupInput() {
-    this.input = new InputController();
+    if (this.isMobile) {
+      console.log("Setting up TouchInputController for mobile.");
+      this.input = new TouchInputController();
+    } else {
+      console.log("Setting up InputController for desktop.");
+      this.input = new InputController();
+    }
   }
   
   _initializeCharacterController() {
@@ -2158,35 +2457,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const startButton = document.getElementById("startGameButton");
   const mutedButton = document.getElementById("startMutedButton");
+  const mobileButton = document.getElementById("startMobileButton"); // Get the new button
   const buttonsContainer = document.getElementById("game-buttons");
 
   console.log("startButton found:", startButton); // Log 2: Check if button exists
   console.log("mutedButton found:", mutedButton); // Log 3: Check if button exists
+  console.log("mobileButton found:", mobileButton); // Log for mobile button
   console.log("buttonsContainer found:", buttonsContainer); // Log 4: Check if container exists
 
-  if (startButton && mutedButton && buttonsContainer) { // Also check container here
+  if (startButton && mutedButton && mobileButton && buttonsContainer) { // Also check mobileButton and container here
     console.log("Buttons and container found, attaching listeners."); // Log 5: Confirm elements are ready
 
     // Helper function to start the game
-    function startGame(muted = false) {
-      console.log(`startGame called with muted = ${muted}`); // Log 7: Check if startGame runs
+    function startGame(muted = false, isMobile = false) { // Added isMobile param
+      console.log(`startGame called with muted = ${muted}, isMobile = ${isMobile}`); // Log 7
       if (buttonsContainer) {
         console.log("Hiding buttons container."); // Log 8: Check if container is hidden
         buttonsContainer.style.display = "none";
       }
       console.log("Creating new Game instance..."); // Log 9: Check before Game creation
-      new Game(muted);
+      new Game(muted, isMobile); // Pass isMobile to Game constructor
       console.log("New Game instance created."); // Log 10: Check after Game creation (might not show if constructor hangs)
     }
 
     // Set up button event listeners
     startButton.addEventListener("click", () => {
         console.log("Start Game button clicked!"); // Log 6a: Check if click fires
-        startGame(false);
+        startGame(false, false); // Not mobile
     });
     mutedButton.addEventListener("click", () => {
         console.log("Start Muted button clicked!"); // Log 6b: Check if click fires
-        startGame(true);
+        startGame(true, false); // Not mobile
+    });
+    mobileButton.addEventListener("click", () => {
+        console.log("Start Mobile button clicked!");
+        startGame(false, true); // IS mobile, default to not muted
     });
     console.log("Event listeners attached."); // Log 11: Confirm listeners attached
 

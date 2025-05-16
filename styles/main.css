@@ -34,7 +34,7 @@ body {
     gap: 10px;
 }
 
-#startGameButton, #startMutedButton {
+#startGameButton, #startMutedButton, #startMobileButton {
     padding: 10px 20px;
     font-size: 1.2em;
     cursor: pointer;
@@ -48,6 +48,10 @@ body {
     background-color: #2196F3;
 }
 
-#startGameButton:hover, #startMutedButton:hover {
+#startMobileButton {
+    background-color: #FF9800; /* Orange color for mobile button */
+}
+
+#startGameButton:hover, #startMutedButton:hover, #startMobileButton:hover {
     opacity: 0.9;
 } 
