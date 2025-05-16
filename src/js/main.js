@@ -90,7 +90,7 @@ class TouchInputController {
       up: false,
       down: false
     };
-    this.touchStates = {}; // To track individual touches { touchId: { type: 'joystick'/'button', joystickType: 'move'/'camera', element: buttonElement, joystick: this.joystickMove/this.joystickCamera } }
+    this.touchStates = {}; // To track individual touches { touchId: { type: 'joystick'/'button'/'cameraButton', element: buttonElement, joystick: this.joystickMove, key: 'actionKey'/'rotationKey' } }
 
     // Joystick properties
     this.joystickMove = {
@@ -98,23 +98,13 @@ class TouchInputController {
       nub: null,
       active: false,
       touchId: null,
-      radius: 40, // Smaller radius
-      nubRadius: 20, // Smaller nub
+      radius: 40, 
+      nubRadius: 20, 
       center: { x: 0, y: 0 },
-      current: { x: 0, y: 0 }, // Nub position relative to joystick center, normalized
-      deadZone: 0.2 // Percentage of radius
+      current: { x: 0, y: 0 }, 
+      deadZone: 0.2 
     };
-    this.joystickCamera = {
-      base: null,
-      nub: null,
-      active: false,
-      touchId: null,
-      radius: 40, // Smaller radius
-      nubRadius: 20, // Smaller nub
-      center: { x: 0, y: 0 },
-      current: { x: 0, y: 0 }, // Nub position relative to joystick center, normalized
-      deadZone: 0.2 // Percentage of radius
-    };
+    // Removed this.joystickCamera
 
     this._createControls();
     this._Initialize();
@@ -156,11 +146,7 @@ class TouchInputController {
         this.joystickMove.center.x = rectMove.left + this.joystickMove.radius;
         this.joystickMove.center.y = rectMove.top + this.joystickMove.radius;
     }
-    if (this.joystickCamera.base) {
-        const rectCamera = this.joystickCamera.base.getBoundingClientRect();
-        this.joystickCamera.center.x = rectCamera.left + this.joystickCamera.radius;
-        this.joystickCamera.center.y = rectCamera.top + this.joystickCamera.radius;
-    }
+    // No camera joystick to update
   }
 
 
@@ -171,50 +157,79 @@ class TouchInputController {
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 150px; /* Smaller height */
+      height: 150px; 
       display: flex;
       justify-content: space-between;
-      align-items: center; /* Center items vertically for joysticks */
-      padding: 15px; /* Smaller padding */
+      align-items: center; 
+      padding: 15px; 
       box-sizing: border-box;
       z-index: 1003;
-      pointer-events: none; /* Container itself doesn't block */
+      pointer-events: none; 
     `;
     document.body.appendChild(this.controlsContainer);
 
     // --- Left side: Movement Joystick ---
     this.movementJoystickContainer = document.createElement('div');
-    // Add some margin to the joystick container itself if needed
     this.movementJoystickContainer.style.cssText = `pointer-events: auto; margin-left: 10px;`; 
     this._createJoystick(this.joystickMove, this.movementJoystickContainer, 'move');
     this.controlsContainer.appendChild(this.movementJoystickContainer);
 
-    // --- Right side: Camera Joystick & Action Buttons ---
+    // --- Right side: Camera D-pad & Action Buttons ---
     this.rightSideFlexContainer = document.createElement('div');
     this.rightSideFlexContainer.style.cssText = `
       display: flex;
-      align-items: center; /* Align camera joystick and action buttons group vertically */
-      gap: 15px; /* Gap between camera joystick and action buttons */
-      pointer-events: none; /* This flex container itself doesn't block */
+      align-items: center; 
+      gap: 15px; 
+      pointer-events: none; 
       margin-right: 10px;
     `;
     this.controlsContainer.appendChild(this.rightSideFlexContainer);
 
-    // Camera Joystick Container
-    this.cameraJoystickContainer = document.createElement('div');
-    this.cameraJoystickContainer.style.cssText = `pointer-events: auto;`;
-    this._createJoystick(this.joystickCamera, this.cameraJoystickContainer, 'camera');
-    this.rightSideFlexContainer.appendChild(this.cameraJoystickContainer); // Add to the flex container
+    // Camera Control Pad (D-pad style)
+    this.cameraPad = document.createElement('div');
+    this.cameraPad.style.cssText = `
+      display: grid;
+      grid-template-columns: repeat(3, 35px); /* Smaller camera buttons */
+      grid-template-rows: repeat(3, 35px);
+      gap: 3px;
+      pointer-events: auto;
+    `;
+    this.rightSideFlexContainer.appendChild(this.cameraPad);
 
-    // Action Buttons Container (now to the right of camera joystick)
+    const createCameraButton = (text, gridArea, rotationKey) => {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.style.cssText = `
+            grid-area: ${gridArea};
+            background-color: rgba(100, 100, 100, 0.7);
+            color: white;
+            border: 1px solid white;
+            border-radius: 5px;
+            font-size: 1em; /* Smaller font for camera buttons */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: manipulation;
+        `;
+        button.dataset.rotationKey = rotationKey; // Used to identify camera buttons
+        this.cameraPad.appendChild(button);
+        return button;
+    };
+
+    this.btnCamUp = createCameraButton('↑', '1 / 2 / 2 / 3', 'up');
+    this.btnCamLeft = createCameraButton('←', '2 / 1 / 3 / 2', 'right'); // ArrowLeft for camera right
+    this.btnCamDown = createCameraButton('↓', '3 / 2 / 4 / 3', 'down');
+    this.btnCamRight = createCameraButton('→', '2 / 3 / 3 / 4', 'left'); // ArrowRight for camera left
+
+    // Action Buttons Container (to the right of Camera D-pad)
     this.actionButtonsContainer = document.createElement('div');
     this.actionButtonsContainer.style.cssText = `
         display: flex;
-        flex-direction: column; /* Stack action buttons vertically */
-        gap: 8px; /* Smaller gap */
+        flex-direction: column; 
+        gap: 8px; 
         pointer-events: auto;
     `;
-    this.rightSideFlexContainer.appendChild(this.actionButtonsContainer); // Add to the flex container
+    this.rightSideFlexContainer.appendChild(this.actionButtonsContainer); 
 
 
     const createActionButton = (text, actionKey) => {
@@ -225,15 +240,15 @@ class TouchInputController {
         color: white;
         border: 1px solid white;
         border-radius: 5px;
-        font-size: 0.9em; /* Smaller font */
-        padding: 8px 10px; /* Smaller padding */
-        touch-action: manipulation; /* Prevents zooming/scrolling on touch */
-        min-width: 45px; /* Ensure buttons have some width */
-        min-height: 30px; /* Ensure buttons have some height */
+        font-size: 0.9em; 
+        padding: 8px 10px; 
+        touch-action: manipulation; 
+        min-width: 45px; 
+        min-height: 30px; 
         text-align: center;
         box-sizing: border-box;
       `;
-      button.dataset.actionKey = actionKey;
+      button.dataset.actionKey = actionKey; // Used for action buttons
       this.actionButtonsContainer.appendChild(button);
       return button;
     };
@@ -256,10 +271,9 @@ class TouchInputController {
     document.addEventListener('touchstart', this._onTouchStart, { passive: false });
     document.addEventListener('touchmove', this._onTouchMove, { passive: false });
     document.addEventListener('touchend', this._onTouchEnd, { passive: false });
-    document.addEventListener('touchcancel', this._onTouchEnd, { passive: false }); // Treat cancel like end
+    document.addEventListener('touchcancel', this._onTouchEnd, { passive: false }); 
     window.addEventListener('resize', this._onWindowResize);
     
-    // Initial update of joystick center positions, slight delay
     setTimeout(() => this._updateJoystickPositions(), 100);
   }
   
@@ -274,89 +288,62 @@ class TouchInputController {
   }
 
   _resetJoystick(joystick) {
+    if (joystick !== this.joystickMove) return; // Only reset movement joystick here
+
     joystick.active = false;
     joystick.touchId = null;
-    this._updateJoystickNub(joystick, joystick.radius, joystick.radius); // Center nub within its base
+    this._updateJoystickNub(joystick, joystick.radius, joystick.radius); 
     joystick.current.x = 0; 
     joystick.current.y = 0; 
 
-    if (joystick === this.joystickMove) {
       this.keys.forward = false;
       this.keys.backward = false;
       this.keys.left = false;
       this.keys.right = false;
-    } else if (joystick === this.joystickCamera) {
-      this.cameraRotation.up = false;
-      this.cameraRotation.down = false;
-      this.cameraRotation.left = false;
-      this.cameraRotation.right = false;
-    }
   }
 
   _handleJoystickInput(joystick, clientX, clientY) {
+    if (joystick !== this.joystickMove) return; // Only handle movement joystick
+
     let deltaX = clientX - joystick.center.x;
     let deltaY = clientY - joystick.center.y;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-    // Nub position relative to joystick base's top-left corner
     let nubXInBase = joystick.radius + deltaX;
     let nubYInBase = joystick.radius + deltaY;
 
     if (distance > joystick.radius) {
       const angle = Math.atan2(deltaY, deltaX);
-      // Clamp nub to edge of joystick base for visual feedback
       nubXInBase = joystick.radius + Math.cos(angle) * joystick.radius;
       nubYInBase = joystick.radius + Math.sin(angle) * joystick.radius;
-      // Update actual input values to be clamped ones
       deltaX = Math.cos(angle) * joystick.radius;
       deltaY = Math.sin(angle) * joystick.radius;
     }
     
     this._updateJoystickNub(joystick, nubXInBase, nubYInBase);
     
-    // Normalized input values (from -1 to 1)
     joystick.current.x = deltaX / joystick.radius; 
     joystick.current.y = deltaY / joystick.radius; 
 
     const normalizedMagnitude = Math.min(distance / joystick.radius, 1.0);
 
     if (normalizedMagnitude < joystick.deadZone) {
-        if (joystick === this.joystickMove) {
-            this.keys.forward = false; this.keys.backward = false; this.keys.left = false; this.keys.right = false;
-        } else { // Camera joystick
-            this.cameraRotation.up = false; this.cameraRotation.down = false; this.cameraRotation.left = false; this.cameraRotation.right = false;
-        }
+        this.keys.forward = false; this.keys.backward = false; this.keys.left = false; this.keys.right = false;
         return;
     }
 
-    const angle = Math.atan2(joystick.current.y, joystick.current.x); // Angle in radians
+    const angle = Math.atan2(joystick.current.y, joystick.current.x); 
     const pi = Math.PI;
 
-    if (joystick === this.joystickMove) {
-      this.keys.forward = (angle >= -3*pi/4 && angle <= -pi/4);
-      this.keys.backward = (angle >= pi/4 && angle <= 3*pi/4);
-      this.keys.left = (angle >= 3*pi/4 || angle <= -3*pi/4);
-      this.keys.right = (angle >= -pi/4 && angle <= pi/4 && joystick.current.x !== 0); // ensure x is not zero for pure up/down
+    this.keys.forward = (angle >= -3*pi/4 && angle <= -pi/4);
+    this.keys.backward = (angle >= pi/4 && angle <= 3*pi/4);
+    this.keys.left = (angle >= 3*pi/4 || angle <= -3*pi/4);
+    this.keys.right = (angle >= -pi/4 && angle <= pi/4 && joystick.current.x !== 0); 
 
-      // Refine to avoid sticky diagonals when mostly vertical or horizontal
-      if (Math.abs(joystick.current.y) > Math.abs(joystick.current.x) * 1.2) { // More vertical
-          this.keys.left = false; this.keys.right = false;
-      } else if (Math.abs(joystick.current.x) > Math.abs(joystick.current.y) * 1.2) { // More horizontal
-          this.keys.forward = false; this.keys.backward = false;
-      }
-    } else if (joystick === this.joystickCamera) {
-      this.cameraRotation.up = (angle >= -3*pi/4 && angle <= -pi/4);
-      this.cameraRotation.down = (angle >= pi/4 && angle <= 3*pi/4);
-      // Note: Camera rotation keys are often inverted (e.g. joystick left makes camera pan right)
-      // This matches your InputController: ArrowLeft -> cameraRotation.right = true
-      this.cameraRotation.right = (angle >= 3*pi/4 || angle <= -3*pi/4); // Joystick Left
-      this.cameraRotation.left = (angle >= -pi/4 && angle <= pi/4 && joystick.current.x !== 0);    // Joystick Right
-
-      if (Math.abs(joystick.current.y) > Math.abs(joystick.current.x) * 1.2) {
-          this.cameraRotation.left = false; this.cameraRotation.right = false;
-      } else if (Math.abs(joystick.current.x) > Math.abs(joystick.current.y) * 1.2) {
-          this.cameraRotation.up = false; this.cameraRotation.down = false;
-      }
+    if (Math.abs(joystick.current.y) > Math.abs(joystick.current.x) * 1.2) { 
+        this.keys.left = false; this.keys.right = false;
+    } else if (Math.abs(joystick.current.x) > Math.abs(joystick.current.y) * 1.2) { 
+        this.keys.forward = false; this.keys.backward = false;
     }
   }
 
@@ -367,8 +354,6 @@ class TouchInputController {
       const touch = touches[i];
       const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
       
-      // Check for joystick interaction first
-      // Ensure only one touch activates a joystick
       if (targetElement === this.joystickMove.base && !this.joystickMove.active) {
         this.joystickMove.active = true;
         this.joystickMove.touchId = touch.identifier;
@@ -377,14 +362,6 @@ class TouchInputController {
         this.joystickMove.base.style.backgroundColor = 'rgba(100, 100, 100, 0.7)'; 
         continue; 
       }
-      if (targetElement === this.joystickCamera.base && !this.joystickCamera.active) {
-        this.joystickCamera.active = true;
-        this.joystickCamera.touchId = touch.identifier;
-        this._handleJoystickInput(this.joystickCamera, touch.clientX, touch.clientY);
-        this.touchStates[touch.identifier] = { type: 'joystick', joystick: this.joystickCamera };
-        this.joystickCamera.base.style.backgroundColor = 'rgba(100, 100, 100, 0.7)';
-        continue;
-      }
 
       // Check for action button interaction
       if (targetElement && targetElement.dataset.actionKey) {
@@ -392,6 +369,15 @@ class TouchInputController {
         this.keys[actionKey] = true;
         targetElement.style.backgroundColor = 'rgba(150, 150, 150, 0.9)'; 
         this.touchStates[touch.identifier] = { type: 'button', key: actionKey, element: targetElement };
+        continue;
+      }
+      
+      // Check for camera D-pad button interaction
+      if (targetElement && targetElement.dataset.rotationKey) {
+        const rotationKey = targetElement.dataset.rotationKey;
+        this.cameraRotation[rotationKey] = true;
+        targetElement.style.backgroundColor = 'rgba(150, 150, 150, 0.9)';
+        this.touchStates[touch.identifier] = { type: 'cameraButton', key: rotationKey, element: targetElement };
       }
     }
   }
@@ -404,12 +390,52 @@ class TouchInputController {
       const touchState = this.touchStates[touch.identifier];
 
       if (touchState && touchState.type === 'joystick') {
-        // Ensure this touch is the one controlling this joystick
         if (touchState.joystick.active && touchState.joystick.touchId === touch.identifier) {
           this._handleJoystickInput(touchState.joystick, touch.clientX, touch.clientY);
         }
       }
-      // No move handling for simple buttons in this setup
+      // For D-pad buttons and action buttons, if a touch moves off, we handle it in _onTouchEnd.
+      // More complex logic could be added here to allow sliding between D-pad buttons if desired.
+      // For now, lifting the finger is required to "press" a different D-pad button.
+      
+      // If touch has moved, check if it left a button it was previously on
+      const currentElement = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (touchState && (touchState.type === 'button' || touchState.type === 'cameraButton') && touchState.element !== currentElement) {
+          if (touchState.type === 'button') {
+              this.keys[touchState.key] = false;
+          } else if (touchState.type === 'cameraButton') {
+              this.cameraRotation[touchState.key] = false;
+          }
+          touchState.element.style.backgroundColor = 'rgba(100, 100, 100, 0.7)'; // Unhighlight
+          // The touch might have landed on another button, or off. _onTouchEnd will clear the state.
+          // Or, if it landed on another recognized button, a new touchstart-like logic could be here.
+          // For simplicity, we'll let _onTouchEnd handle the final release.
+          // If it lands on a new button, that new button should get its own 'start' if it's a new touch,
+          // or if an existing touch slides onto it, this would require more state management.
+          // Current _onTouchStart logic assumes a new touch or joystick interaction.
+          
+          // Attempt to activate new button if slid onto
+          if (currentElement) {
+              const actionKey = currentElement.dataset.actionKey;
+              const rotationKey = currentElement.dataset.rotationKey;
+
+              if (actionKey) {
+                  this.keys[actionKey] = true;
+                  currentElement.style.backgroundColor = 'rgba(150, 150, 150, 0.9)';
+                  this.touchStates[touch.identifier] = { type: 'button', key: actionKey, element: currentElement };
+              } else if (rotationKey) {
+                  this.cameraRotation[rotationKey] = true;
+                  currentElement.style.backgroundColor = 'rgba(150, 150, 150, 0.9)';
+                  this.touchStates[touch.identifier] = { type: 'cameraButton', key: rotationKey, element: currentElement };
+              } else {
+                 // Slid off to a non-interactive area from a button
+                 delete this.touchStates[touch.identifier];
+              }
+          } else {
+             // Slid off screen from a button
+             delete this.touchStates[touch.identifier];
+          }
+      }
     }
   }
 
@@ -423,14 +449,18 @@ class TouchInputController {
 
       if (touchState) {
         if (touchState.type === 'joystick') {
-          // Only reset if this specific touch was controlling the joystick
           if (touchState.joystick.touchId === touchId) {
-            this._resetJoystick(touchState.joystick);
+            this._resetJoystick(touchState.joystick); // This now only affects movement joystick
             touchState.joystick.base.style.backgroundColor = 'rgba(80, 80, 80, 0.5)'; 
           }
         } else if (touchState.type === 'button') {
           this.keys[touchState.key] = false;
           if (touchState.element) { 
+            touchState.element.style.backgroundColor = 'rgba(100, 100, 100, 0.7)'; 
+          }
+        } else if (touchState.type === 'cameraButton') {
+          this.cameraRotation[touchState.key] = false;
+           if (touchState.element) { 
             touchState.element.style.backgroundColor = 'rgba(100, 100, 100, 0.7)'; 
           }
         }
@@ -439,11 +469,13 @@ class TouchInputController {
     }
   }
 
-  resetMovementKeys() { // Primarily for game-initiated resets
+  resetMovementKeys() { 
     console.log("Resetting movement keys in TouchInputController.");
-    this._resetJoystick(this.joystickMove); // Resets move keys
-    // Action buttons (space, shift, quit) are reset by their own _onTouchEnd
-    // Camera rotation is reset by _resetJoystick(this.joystickCamera)
+    this._resetJoystick(this.joystickMove); 
+    // Action buttons are reset by their own _onTouchEnd
+    // Camera D-pad buttons are also reset by their own _onTouchEnd
+    // If a full reset is needed, explicitly set cameraRotation flags to false:
+    // this.cameraRotation.up = false; this.cameraRotation.down = false; ... etc.
   }
 
   destroyControls() {
