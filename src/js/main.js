@@ -988,9 +988,20 @@ class Game {
 
     // --- Orbiting Light Variables ---
     this.orbitingLight = null;            // Reference to the orbiting light
+    this.directionalLight = null;         // Reference to the directional light
     this.orbitCenter = new THREE.Vector3(0, 10000, 0); // Center of the orbit (can adjust Y)
     this.orbitRadius = 500000;           // Radius of the orbit - Increased from 25000
     this.orbitSpeed = 0.001;              // Speed of orbit (radians per second) 
+    this.normalLightSettings = {
+        orbitingColor: new THREE.Color(0xffffff),
+        orbitingIntensity: 0.8,
+        directionalIntensity: 0.4
+    };
+    this.spookyLightSettings = {
+        orbitingColor: new THREE.Color(0xff00ff),
+        orbitingIntensity: 1.8,
+        directionalIntensity: 0.01
+    };
     // --- End Orbiting Light Variables ---
 
     // --- Player Head Light Variables ---
@@ -1005,6 +1016,8 @@ class Game {
     this.playerChestOffsetY = 3500; // How far above the player's base position
     this.playerChestOrbitRadius = 2500; // Horizontal radius around the player
     this.playerChestOrbitSpeed = 1.5;  // Speed of orbit around the player
+    this.bigChestSpawned = false;
+    this.spawnPosition = new THREE.Vector3();
     // --- End Player Chest Orbit Variables ---
 
     // --- Chest Variables ---
@@ -1216,8 +1229,10 @@ class Game {
 
   // New: Resets player position based on the loaded level
   _resetPlayerPosition(levelModel) {
+      this.bigChestSpawned = false; // Reset the flag on level load/reset
+
       // Find a suitable spawn point in the new level
-      let spawnPosition = new THREE.Vector3(0, 5000, 0); // More reasonable default backup Y
+      this.spawnPosition.set(0, 5000, 0); // More reasonable default backup Y
       const planeMesh = levelModel.getObjectByName('piso'); // Still useful for ground height
 
       console.log(`Resetting player position for level: ${this.currentLevelPath}`);
@@ -1235,7 +1250,7 @@ class Game {
               const pisoCenter = new THREE.Vector3();
               planeBBox.getCenter(pisoCenter);
 
-              spawnPosition.set(
+              this.spawnPosition.set(
                   pisoCenter.x,       // Use the calculated X center
                   planeHeight + 5000,  // Place slightly above the plane surface
                   pisoCenter.z        // Use the calculated Z center
@@ -1245,9 +1260,9 @@ class Game {
               // !!! IMPORTANT: Replace these with actual desired coordinates for nivel1.glb !!!
               // You might base them on planePosition or use entirely fixed coordinates.
               // Example using fixed coordinates relative to world origin (0,0,0) if 'piso' isn't helpful for positioning:
-              // spawnPosition.set(1000, planeHeight + 100, 2000);
+              // this.spawnPosition.set(1000, planeHeight + 100, 2000);
               // Example using different offsets from 'piso':
-              spawnPosition.set(
+              this.spawnPosition.set(
                   planePosition.x + 5000, // Use DIFFERENT offsets for level 1
                   planeHeight + 100,
                   planePosition.z - 10000
@@ -1255,7 +1270,7 @@ class Game {
           } else {
               // Fallback for any other level path, maybe use the center of the piso?
               console.warn(`Unknown level path for spawn: ${this.currentLevelPath}. Using default offset.`);
-               spawnPosition.set(
+               this.spawnPosition.set(
                   planePosition.x,
                   planeHeight + 100,
                   planePosition.z
@@ -1263,19 +1278,19 @@ class Game {
           }
           // --- End Conditional Spawn Logic ---
 
-          console.log("Player spawn point calculated:", spawnPosition);
+          console.log("Player spawn point calculated:", this.spawnPosition);
 
       } else {
           console.warn("'piso' mesh not found in the new level. Using default world origin spawn point.");
-           spawnPosition.set(0, 5000, 0); // Use the backup defined earlier
+           this.spawnPosition.set(0, 5000, 0); // Use the backup defined earlier
       }
 
 
     if (this.playerModel) {
-          this.playerModel.position.copy(spawnPosition);
+          this.playerModel.position.copy(this.spawnPosition);
           this.playerModel.rotation.set(0, 0, 0); // Reset rotation
         this.playerModel.updateMatrixWorld(true);
-          this.coordinateOffset.copy(spawnPosition); // Update respawn offset
+          this.coordinateOffset.copy(this.spawnPosition); // Update respawn offset
           console.log("Player position reset to:", this.playerModel.position);
       }
 
@@ -1311,48 +1326,32 @@ class Game {
           const planeHeight = planeBBox.max.y;
 
           let chestPos1 = new THREE.Vector3();
-          let chestPos2 = new THREE.Vector3(); // Position for the second chest
+          // Position for the second chest is now handled in _spawnBigChest
 
           if (this.currentLevelPath.endsWith('juegomapa334433.glb')) {
               // Chest 1 relative to player spawn (center of piso)
               const chestOffset1 = new THREE.Vector3(10000, 0, 5000);
-              chestPos1.copy(spawnPosition).add(chestOffset1);
+              chestPos1.copy(this.spawnPosition).add(chestOffset1);
               // Set a desired fixed height - physics will ignore this chest
               chestPos1.y = planeHeight - 4000; // Example: 30k units above plane
 
-              // Chest 2 position - ** Define a DIFFERENT position **
-              const chestOffset2 = new THREE.Vector3(-15000, 0, -8000); // Example different offset
-              chestPos2.copy(spawnPosition).add(chestOffset2);
-              chestPos2.y = planeHeight + 100; 
-
           } else if (this.currentLevelPath.endsWith('nivel1.glb')) {
               // Chest 1 position for nivel1.glb
-              chestPos1.set(spawnPosition.x + 10000, planeHeight + 30000, spawnPosition.z); // Set fixed height here too
+              chestPos1.set(this.spawnPosition.x + 10000, planeHeight + 30000, this.spawnPosition.z); // Set fixed height here too
               
-              // Chest 2 position for nivel1.glb - ** Define a DIFFERENT position **
-              chestPos2.set(spawnPosition.x - 5000, planeHeight + 100, spawnPosition.z + 15000); // Example
-
           } else {
               // Default positions if level unknown but piso exists
-              chestPos1.copy(spawnPosition).add(new THREE.Vector3(5000, 0, 0));
+              chestPos1.copy(this.spawnPosition).add(new THREE.Vector3(5000, 0, 0));
               chestPos1.y = planeHeight + 30000; // Default fixed height
-              chestPos2.copy(spawnPosition).add(new THREE.Vector3(-5000, 0, 5000)); // Example
-              chestPos2.y = planeHeight + 100;
           }
 
-          // Add the chest instances
-          // First chest - default scale, ignore physics
-          this._addChestInstance(chestPos1, -Math.PI/6, 1, true); // Set ignorePhysics = true
-          // Second chest - scaled, ignore physics (because it's orbiting)
-          this._addChestInstance(chestPos2, Math.PI/4, 100.0, true); // Set ignorePhysics = true
+          // Add only the first chest instance
+          this._addChestInstance(chestPos1, -Math.PI/6, 1, true); 
 
       } else {
-          console.warn("'piso' not found, cannot accurately position chests. Placing defaults near player.");
-          // Add default chests near player spawn
-          // First chest - default scale, ignore physics
-          this._addChestInstance(spawnPosition.clone().add(new THREE.Vector3(5000, 30000, 0)), -Math.PI/6, 1, true); // Fixed height
-          // Second chest - scaled up, ignore physics
-          this._addChestInstance(spawnPosition.clone().add(new THREE.Vector3(-5000, 100, 5000)), Math.PI/4, 1.5, true); // Still ignoring physics
+          console.warn("'piso' not found, cannot accurately position chests. Placing default near player.");
+          // Add default chest near player spawn
+          this._addChestInstance(this.spawnPosition.clone().add(new THREE.Vector3(5000, 30000, 0)), -Math.PI/6, 1, true); // Fixed height
       }
       // --- End Reset and Place Chests ---
 
@@ -1508,7 +1507,11 @@ class Game {
     // Check if the light already exists (e.g., from a previous level load)
     if (!this.orbitingLight) {
         // Increased intensity from 0.8 to 1.5
-        this.orbitingLight = new THREE.PointLight(0xff00ff, 1.8, 2000000, 2); // Color 0xff00ff, intensity 1.5, range 50000
+        this.orbitingLight = new THREE.PointLight(
+            this.normalLightSettings.orbitingColor, 
+            this.normalLightSettings.orbitingIntensity, 
+            2000000, 2
+        ); // Color 0xff00ff, intensity 1.5, range 50000
         //this.orbitingLight = new THREE.PointLight(0xffc45d, 1.8, 2000000, 2);
         // this.orbitingLight.position.set(0, 10000, 0); // Remove static position setting
         this.orbitingLight.name = "replacementPointLight"; 
@@ -1519,36 +1522,45 @@ class Game {
         if (!this.scene.getObjectByName("replacementPointLight")) {
             this.scene.add(this.orbitingLight);
         }
+    } else {
+        // On level reload, reset to normal
+        this.orbitingLight.color.copy(this.normalLightSettings.orbitingColor);
+        this.orbitingLight.intensity = this.normalLightSettings.orbitingIntensity;
     }
 
     // --- Disable the Directional Light ---
      
     // Keep the Directional Light
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.01);
-    directionalLight.position.set(50, 100, -50); // Adjust position as needed
-    directionalLight.castShadow = true;
-    
-    // Configure shadow properties
-    directionalLight.shadow.mapSize.width = 2048; // Higher resolution for better shadows
-    directionalLight.shadow.mapSize.height = 2048;
-    // Adjust shadow camera frustum based on scene size
-    directionalLight.shadow.camera.near = 0.5;
-    directionalLight.shadow.camera.far = 500000; // Increase if needed
-    directionalLight.shadow.camera.left = -100000; // Adjust bounds
-    directionalLight.shadow.camera.right = 100000;
-    directionalLight.shadow.camera.top = 100000;
-    directionalLight.shadow.camera.bottom = -100000;
+    if (!this.directionalLight) {
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, this.normalLightSettings.directionalIntensity);
+        this.directionalLight.position.set(50, 100, -50); // Adjust position as needed
+        this.directionalLight.castShadow = true;
+        
+        // Configure shadow properties
+        this.directionalLight.shadow.mapSize.width = 2048; // Higher resolution for better shadows
+        this.directionalLight.shadow.mapSize.height = 2048;
+        // Adjust shadow camera frustum based on scene size
+        this.directionalLight.shadow.camera.near = 0.5;
+        this.directionalLight.shadow.camera.far = 500000; // Increase if needed
+        this.directionalLight.shadow.camera.left = -100000; // Adjust bounds
+        this.directionalLight.shadow.camera.right = 100000;
+        this.directionalLight.shadow.camera.top = 100000;
+        this.directionalLight.shadow.camera.bottom = -100000;
 
-    // Add lights to scene only if they aren't already there
-    // (This prevents adding lights multiple times on level change)
-    // Ambient light check removed
-     if (!this.scene.getObjectByName("directionalLight")) {
-       directionalLight.name = "directionalLight";
-       this.scene.add(directionalLight);
-       // Optional: Add a shadow camera helper for debugging
-       // const shadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
-       // this.scene.add(shadowHelper);
-     }
+        // Add lights to scene only if they aren't already there
+        // (This prevents adding lights multiple times on level change)
+        // Ambient light check removed
+         if (!this.scene.getObjectByName("directionalLight")) {
+           this.directionalLight.name = "directionalLight";
+           this.scene.add(this.directionalLight);
+           // Optional: Add a shadow camera helper for debugging
+           // const shadowHelper = new THREE.CameraHelper(this.directionalLight.shadow.camera);
+           // this.scene.add(shadowHelper);
+         }
+    } else {
+        // On level reload, reset to normal
+        this.directionalLight.intensity = this.normalLightSettings.directionalIntensity;
+    }
     
     // --- End Disable the Directional Light ---
 
@@ -2156,6 +2168,15 @@ class Game {
     // Handle chest interaction via Q key (only if frozen specifically for the chest)
     const wasFrozenForChest = this.freezeMovement && this.interactingChestSet && !this.frozenByUntexturedWarning && !this.isPreTeleportLock && !this.isTeleportingFreeze && !this.isDyingPhase1;
     if (wasFrozenForChest && this.input.keys.quit && this.chestMessage.style.display === 'block') {
+        // --- NEW LOGIC ---
+        // Check if this is the first chest and the big one hasn't spawned
+        if (this.interactingChestSet === this.chestSets[0] && !this.bigChestSpawned) {
+            console.log("Interacting with the first chest. Spawning the big chest.");
+            this._spawnBigChest();
+            this.bigChestSpawned = true;
+        }
+        // --- END NEW LOGIC ---
+
         console.log("Q pressed near chest. Initiating move back.");
         
         // Calculate backward direction
@@ -2574,6 +2595,47 @@ class Game {
     return div;
   }
   // +++ End New Method +++
+
+  _spawnBigChest() {
+    console.log("Attempting to spawn the big chest.");
+    this._setSpookyLights(); 
+    
+    let chestPos2 = new THREE.Vector3();
+
+    if (!this.planeMesh) {
+        console.warn("'piso' not found, cannot accurately position big chest. Placing default near player spawn.");
+        chestPos2.copy(this.spawnPosition).add(new THREE.Vector3(-5000, 100, 5000));
+    } else {
+        const planeBBox = new THREE.Box3().setFromObject(this.planeMesh);
+        const planeHeight = planeBBox.max.y;
+
+        if (this.currentLevelPath.endsWith('juegomapa334433.glb')) {
+            const chestOffset2 = new THREE.Vector3(-15000, 0, -8000); // Example different offset
+            chestPos2.copy(this.spawnPosition).add(chestOffset2);
+            chestPos2.y = planeHeight + 100;
+        } else if (this.currentLevelPath.endsWith('nivel1.glb')) {
+            chestPos2.set(this.spawnPosition.x - 5000, planeHeight + 100, this.spawnPosition.z + 15000); // Example
+        } else {
+            // Default position if level unknown but piso exists
+            chestPos2.copy(this.spawnPosition).add(new THREE.Vector3(-5000, 0, 5000)); // Example
+            chestPos2.y = planeHeight + 100;
+        }
+    }
+
+    // Add the second chest - scaled, ignore physics (because it's orbiting)
+    this._addChestInstance(chestPos2, Math.PI / 4, 100.0, true);
+  }
+
+  _setSpookyLights() {
+    console.log("Switching to spooky lights.");
+    if (this.orbitingLight) {
+        this.orbitingLight.color.copy(this.spookyLightSettings.orbitingColor);
+        this.orbitingLight.intensity = this.spookyLightSettings.orbitingIntensity;
+    }
+    if (this.directionalLight) {
+        this.directionalLight.intensity = this.spookyLightSettings.directionalIntensity;
+    }
+  }
 }
 
 // Start the game when DOM is loaded
