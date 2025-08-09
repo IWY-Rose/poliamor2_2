@@ -1118,7 +1118,7 @@ class Game {
       // REMOVED: this._setupChest(chestModel.scene); - Chest instances created later
 
       // Load the initial level
-      await this._loadLevel('/models/juegomapa334433.glb'); 
+      await this._loadLevel('/models/juegomapa.glb'); 
 
       // Initialize components 
       this._initializeCharacterController();
@@ -1244,8 +1244,8 @@ class Game {
           const planeHeight = planeBBox.max.y; // Base height from 'piso'
 
           // --- Conditional Spawn Logic ---
-          if (this.currentLevelPath.endsWith('juegomapa334433.glb')) {
-              console.log("Setting spawn for juegomapa334433.glb to piso center.");
+          if (this.currentLevelPath.endsWith('juegomapa.glb')) {
+              console.log("Setting spawn for juegomapa.glb to piso center.");
               // Calculate the center of the piso bounding box
               const pisoCenter = new THREE.Vector3();
               planeBBox.getCenter(pisoCenter);
@@ -1328,7 +1328,7 @@ class Game {
           let chestPos1 = new THREE.Vector3();
           // Position for the second chest is now handled in _spawnBigChest
 
-          if (this.currentLevelPath.endsWith('juegomapa334433.glb')) {
+          if (this.currentLevelPath.endsWith('juegomapa.glb')) {
               // Chest 1 relative to player spawn (center of piso)
               const chestOffset1 = new THREE.Vector3(10000, 0, 5000);
               chestPos1.copy(this.spawnPosition).add(chestOffset1);
@@ -2609,7 +2609,7 @@ class Game {
         const planeBBox = new THREE.Box3().setFromObject(this.planeMesh);
         const planeHeight = planeBBox.max.y;
 
-        if (this.currentLevelPath.endsWith('juegomapa334433.glb')) {
+        if (this.currentLevelPath.endsWith('juegomapa.glb')) {
             const chestOffset2 = new THREE.Vector3(-15000, 0, -8000); // Example different offset
             chestPos2.copy(this.spawnPosition).add(chestOffset2);
             chestPos2.y = planeHeight + 100;
