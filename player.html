@@ -28,11 +28,18 @@
                         <ul id="playlist" class="playlist-list"></ul>
                     </div>
                 </div>
+                <div class="visualizer-controls">
+                    <button id="vis-bars" class="vis-btn">1</button>
+                    <button id="vis-circle" class="vis-btn">2</button>
+                    <button id="vis-wave" class="vis-btn">3</button>
+                </div>
             </div>
             <div class="player-screen">
                 <div id="three-container"></div>
             </div>
-            <div class="player-side-panel right"></div>
+            <div class="player-side-panel right">
+                <canvas id="soundwave-canvas"></canvas>
+            </div>
         </div>
         <div class="player-bottom-panel">
             <div class="player-controls">
