@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Interactive Player ~ GOLGI STUDIOS 🎵</title>
+    <link rel="stylesheet" href="/styles/retro.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+</head>
+<body class="player-body">
+
+    <div class="player-container">
+        <div class="player-top-panel">
+            <a href="gallery.html">
+                VOLVER
+            </a>
+            tiutlutslusl
+        </div>
+        <div class="player-middle-panel">
+            <div class="player-side-panel left">
+                <div class="playlist-container">
+                    <div class="playlist-controls">
+                        <button id="playlist-up" class="playlist-btn">▲</button>
+                        <button id="playlist-select" class="playlist-btn select"></button>
+                        <button id="playlist-down" class="playlist-btn">▼</button>
+                    </div>
+                    <div class="playlist-screen">
+                        <ul id="playlist" class="playlist-list"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="player-screen">
+                <div id="three-container"></div>
+            </div>
+            <div class="player-side-panel right"></div>
+        </div>
+        <div class="player-bottom-panel">
+            <div class="player-controls">
+                <button id="speed-up-btn" class="player-btn">1</button>
+                <button id="slow-down-btn" class="player-btn">2</button>
+                <button id="stop-btn" class="player-btn">3</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/js/Player.js"></script>
+</body>
+</html>

@@ -3,40 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wauu</title>
-    <link rel="stylesheet" href="/styles/main.css">
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        a:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <title>🌈 GOLGI STUDIOS ~ Music & Games ~ Surreal Experience 🌈</title>
+    <link rel="stylesheet" href="/styles/retro.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 </head>
-<body>
-    <h1>Golgi Studios juego numero 1, verssion 0,2</h1>
-    <a href="game.html">Play Game</a>
-    <p>TRIGGER WARNING
-        <br> This game is not recommended for people with epilepsy or those who are easily triggered.
-        <br>muchas lucees cuidao
-    </p>
-    <!-- <p>muchas lucees cuidao</p> -->
+<body class="game-menu-body">
+    <!-- Game Menu Container -->
+    <div class="game-menu-container">
+        <!-- Header Section -->
+        <div class="game-menu-header">
+            <h1 class="game-title">GOLGI STUDIOS</h1>
+            <div class="game-subtitle">♪ Music & Game Experience ♪</div>
+            <div class="decorative-line"></div>
+        </div>
+
+        <!-- Main Menu -->
+        <div class="main-menu">
+            <!-- Primary Actions -->
+            <a href="game.html" class="menu-button primary-button play-btn">
+                <div class="button-content">
+                    <span class="button-icon">🎮</span>
+                    <span class="button-label">PLAY GAME</span>
+                </div>
+            </a>
+
+            <a href="gallery.html" class="menu-button primary-button info-btn">
+                <div class="button-content">
+                    <span class="button-icon">🖼️</span>
+                    <span class="button-label">GALLERY</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Enter Section -->
+        <div class="enter-section">
+            <div class="enter-arrows">
+                <span class="arrow">►</span>
+                <span class="arrow">►</span>
+            </div>
+            <div class="enter-text">ALERTA</div>
+            <div class="enter-arrows">
+                <span class="arrow">◄</span>
+                <span class="arrow">◄</span>
+            </div>
+        </div>
+
+        <!-- Warning Notice -->
+        <div class="warning-notice">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">Contains Flashing Lights!</div>
+        </div>
+
+        <!-- Footer with visitor counter -->
+        <div class="game-menu-footer">
+            <div class="visitor-counter">
+                <span class="counter-label">Visitors:</span>
+                <span class="counter-number" id="visitorCount">000001337</span>
+            </div>
+            <div class="footer-text">Welcome to our digital dimension!</div>
+        </div>
+    </div>
+
+    <!-- Floating background elements -->
+    <div class="bg-floating-element">🌟</div>
+    <div class="bg-floating-element">🎵</div>
+    <div class="bg-floating-element">🎮</div>
+    <div class="bg-floating-element">💫</div>
+
+    <script>
+        // Simple visitor counter animation
+        function animateCounter() {
+            const counter = document.getElementById('visitorCount');
+            let count = 1337;
+            
+            setInterval(() => {
+                count = Math.floor(Math.random() * 9999) + 1337;
+                counter.textContent = count.toString().padStart(9, '0');
+            }, 5000);
+        }
+
+        // Sparkle effect on hover
+        document.querySelectorAll('.menu-button').forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Initialize effects
+        document.addEventListener('DOMContentLoaded', () => {
+            animateCounter();
+            
+            // Simple sparkle effect
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    createSparkle();
+                }
+            }, 1000);
+        });
+
+        function createSparkle() {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'menu-sparkle';
+            sparkle.style.left = Math.random() * window.innerWidth + 'px';
+            sparkle.style.top = Math.random() * window.innerHeight + 'px';
+            document.body.appendChild(sparkle);
+            
+            setTimeout(() => sparkle.remove(), 2000);
+        }
+    </script>
 </body>
 </html>
