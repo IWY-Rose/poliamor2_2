@@ -28,17 +28,23 @@
                         <ul id="playlist" class="playlist-list"></ul>
                     </div>
                 </div>
-                <div class="visualizer-controls">
-                    <button id="vis-bars" class="vis-btn">1</button>
-                    <button id="vis-circle" class="vis-btn">2</button>
-                    <button id="vis-wave" class="vis-btn">3</button>
+                <div class="audio-controls">
+                    <button id="pause-resume-btn" class="audio-btn">⏸️</button>
+                    <button id="audio-stop-btn" class="audio-btn">⏹️</button>
                 </div>
             </div>
             <div class="player-screen">
                 <div id="three-container"></div>
             </div>
             <div class="player-side-panel right">
-                <canvas id="soundwave-canvas"></canvas>
+                <div class="lyrics-container">
+                    <div id="lyrics-display" class="lyrics-display">
+                        <!-- Current lyrics will appear here -->
+                    </div>
+                </div>
+                <div class="oscilloscope-container">
+                    <canvas id="soundwave-canvas"></canvas>
+                </div>
             </div>
         </div>
         <div class="player-bottom-panel">

@@ -12,7 +12,6 @@ const CAMERA_DISTANCE = 5;
 // --- Audio Visualizer State ---
 let audioContext, analyser, sourceNode, dataArray;
 let canvas, canvasCtx;
-let visualizerMode = 'bars'; // 'bars', 'circle', or 'wave'
 
 // --- Playlist State ---
 const songs = [
@@ -21,11 +20,114 @@ const songs = [
     'pajaro.mp3',
     'caminata.mp3',
     'salto.mp3',
-    'caida.mp3'
+    'caida.mp3',
+    'poliamor1.mp3',
+    'prueba01.mp3'
 ];
 let currentSongIndex = 0;
 let currentAudio = null;
 let playlistItems = [];
+let isPlaying = false;
+
+// --- Lyrics State ---
+let currentLyrics = [];
+let currentLyricIndex = 0;
+let lyricsDisplay = null;
+
+// Update lyrics display based on current playback time
+function updateLyricsDisplay() {
+    if (!currentAudio || currentLyrics.length === 0) return;
+    
+    const currentTime = currentAudio.currentTime;
+    
+    // Find the current lyric line
+    let lyricToShow = '';
+    for (let i = 0; i < currentLyrics.length; i++) {
+        if (currentTime >= currentLyrics[i].time) {
+            lyricToShow = currentLyrics[i].text;
+            currentLyricIndex = i;
+        } else {
+            break;
+        }
+    }
+    
+    if (lyricsDisplay.textContent !== lyricToShow) {
+        lyricsDisplay.textContent = lyricToShow;
+    }
+}
+
+// LRC Parser Function - Fixed to handle your file format
+function parseLRC(lrcContent) {
+    const lines = lrcContent.split('\n');
+    const lyrics = [];
+    
+    for (const line of lines) {
+        // Match timestamp pattern [mm:ss.xxx] with optional space and handle both 2 and 3 digit decimals
+        const match = line.match(/\[(\d{1,2}):(\d{2})(?:\.(\d{2,3}))?\]\s*(.*)/);
+        if (match) {
+            const minutes = parseInt(match[1]);
+            const seconds = parseInt(match[2]);
+            let centiseconds = 0;
+            
+            // Handle both 2-digit and 3-digit decimal places
+            if (match[3]) {
+                if (match[3].length === 3) {
+                    // Convert milliseconds to centiseconds (890 -> 89)
+                    centiseconds = Math.floor(parseInt(match[3]) / 10);
+                } else {
+                    // Already centiseconds
+                    centiseconds = parseInt(match[3]);
+                }
+            }
+            
+            const text = match[4] ? match[4].trim() : '';
+            
+            const timeInSeconds = minutes * 60 + seconds + centiseconds / 100;
+            if (text) { // Only add non-empty lyrics
+                lyrics.push({ time: timeInSeconds, text: text });
+                console.log(`Parsed: ${timeInSeconds.toFixed(2)}s - "${text}"`); // Debug log
+            }
+        }
+    }
+    
+    return lyrics.sort((a, b) => a.time - b.time);
+}
+
+// Load lyrics from LRC file
+async function loadLyrics(songName) {
+    try {
+        const lrcFileName = songName.replace('.mp3', '.lrc');
+        const response = await fetch(`/lrc/${lrcFileName}`);
+        
+        if (response.ok) {
+            const lrcContent = await response.text();
+            const parsedLyrics = parseLRC(lrcContent);
+            console.log(`Loaded ${parsedLyrics.length} lyrics lines for ${songName}`);
+            return parsedLyrics;
+        } else {
+            console.log(`No lyrics file found for ${songName}`);
+            return [];
+        }
+    } catch (error) {
+        console.error(`Error loading lyrics for ${songName}:`, error);
+        return [];
+    }
+}
+
+// Setup lyrics for current song
+async function setupLyrics(songIndex) {
+    const songName = songs[songIndex];
+    currentLyrics = await loadLyrics(songName);
+    currentLyricIndex = 0;
+    
+    if (currentLyrics.length === 0) {
+        lyricsDisplay.textContent = 'No lyrics available';
+        lyricsDisplay.className = 'lyrics-display no-lyrics';
+    } else {
+        lyricsDisplay.className = 'lyrics-display';
+        lyricsDisplay.textContent = ''; // Clear display, will be updated by timeupdate
+    }
+}
 
 function init() {
     // Scene
@@ -67,9 +169,16 @@ function init() {
     
     // --- Playlist Logic ---
     setupPlaylist();
+    
+    // --- Audio Control Logic ---
+    setupAudioControls();
 
-    // --- Visualizer Control Logic ---
-    setupVisualizerControls();
+    // Initialize lyrics display
+    lyricsDisplay = document.getElementById('lyrics-display');
+    if (lyricsDisplay) {
+        lyricsDisplay.textContent = 'Select a song to see lyrics';
+        lyricsDisplay.className = 'lyrics-display no-lyrics';
+    }
 
     // Event Listener for resize
     window.addEventListener('resize', onWindowResize, false);
@@ -79,27 +188,6 @@ function init() {
 
     // Start animation
     animate();
-}
-
-function setupVisualizerControls() {
-    const visButtons = {
-        bars: document.getElementById('vis-bars'),
-        circle: document.getElementById('vis-circle'),
-        wave: document.getElementById('vis-wave')
-    };
-
-    function setActiveButton(mode) {
-        visualizerMode = mode;
-        Object.values(visButtons).forEach(btn => btn?.classList.remove('active'));
-        visButtons[mode]?.classList.add('active');
-    }
-
-    visButtons.bars?.addEventListener('click', () => setActiveButton('bars'));
-    visButtons.circle?.addEventListener('click', () => setActiveButton('circle'));
-    visButtons.wave?.addEventListener('click', () => setActiveButton('wave'));
-
-    // Set initial active button
-    setActiveButton('bars');
 }
 
 function setupPlaylist() {
@@ -134,6 +222,41 @@ function setupPlaylist() {
     updatePlaylistSelection(); // Set initial selection
 }
 
+function setupAudioControls() {
+    const pauseResumeBtn = document.getElementById('pause-resume-btn');
+    const audioStopBtn = document.getElementById('audio-stop-btn');
+
+    pauseResumeBtn?.addEventListener('click', () => {
+        if (currentAudio) {
+            if (isPlaying) {
+                currentAudio.pause();
+                isPlaying = false;
+                pauseResumeBtn.textContent = '▶️';
+            } else {
+                currentAudio.play();
+                isPlaying = true;
+                pauseResumeBtn.textContent = '⏸️';
+            }
+        }
+    });
+
+    audioStopBtn?.addEventListener('click', () => {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            isPlaying = false;
+            const pauseResumeBtn = document.getElementById('pause-resume-btn');
+            if (pauseResumeBtn) {
+                pauseResumeBtn.textContent = '▶️';
+            }
+            // Reset lyrics display
+            if (currentLyrics.length > 0) {
+                lyricsDisplay.textContent = '';
+            }
+        }
+    });
+}
+
 function updatePlaylistSelection() {
     playlistItems.forEach((item, index) => {
         if (index === currentSongIndex) {
@@ -144,14 +267,23 @@ function updatePlaylistSelection() {
     });
 }
 
-function playSong(index) {
+async function playSong(index) {
     if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
+        // Remove previous event listener
+        currentAudio.removeEventListener('timeupdate', updateLyricsDisplay);
     }
+    
     const songSrc = `/audio/${songs[index]}`;
     currentAudio = new Audio(songSrc);
     currentAudio.crossOrigin = "anonymous";
+
+    // Setup lyrics for this song (async)
+    await setupLyrics(index);
+
+    // Add time update listener for lyrics sync
+    currentAudio.addEventListener('timeupdate', updateLyricsDisplay);
 
     // --- Setup Web Audio API for analysis ---
     if (!audioContext) {
@@ -170,6 +302,13 @@ function playSong(index) {
     dataArray = new Uint8Array(bufferLength);
     
     currentAudio.play();
+    isPlaying = true;
+    
+    // Update pause/resume button
+    const pauseResumeBtn = document.getElementById('pause-resume-btn');
+    if (pauseResumeBtn) {
+        pauseResumeBtn.textContent = '⏸️';
+    }
 
     // Trigger the camera animation
     if (!isCameraAnimating) {
@@ -190,67 +329,37 @@ function onWindowResize() {
     }
     
     if (canvas) {
-        const rightPanel = document.querySelector('.player-side-panel.right');
-        if (rightPanel) {
-            canvas.width = rightPanel.clientWidth;
-            canvas.height = rightPanel.clientHeight;
+        const oscilloscopeContainer = document.querySelector('.oscilloscope-container');
+        if (oscilloscopeContainer) {
+            canvas.width = oscilloscopeContainer.clientWidth;
+            canvas.height = oscilloscopeContainer.clientHeight;
         }
     }
 }
 
-// --- Visualizer Drawing Functions ---
+function drawSoundwave() {
+    if (!analyser || !canvasCtx || !canvas) return;
 
-function drawBars() {
+    // Clear the canvas
     canvasCtx.fillStyle = '#1a1a1a';
     canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-    const bufferLength = analyser.frequencyBinCount;
-    const barWidth = (canvas.width / bufferLength) * 1.5;
-    let x = 0;
-    for (let i = 0; i < bufferLength; i++) {
-        const barHeight = dataArray[i] * (canvas.height / 256);
-        canvasCtx.fillStyle = 'hotpink';
-        canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 2;
-    }
-}
-
-function drawCircle() {
-    canvasCtx.fillStyle = '#1a1a1a';
-    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-    const bufferLength = analyser.frequencyBinCount;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) * 0.5;
-    let angle = 0;
-    const sliceAngle = (Math.PI * 2) / bufferLength;
-    for (let i = 0; i < bufferLength; i++) {
-        const barHeight = dataArray[i] * 0.5;
-        const x1 = centerX + Math.cos(angle) * radius;
-        const y1 = centerY + Math.sin(angle) * radius;
-        const x2 = centerX + Math.cos(angle) * (radius + barHeight);
-        const y2 = centerY + Math.sin(angle) * (radius + barHeight);
-        canvasCtx.beginPath();
-        canvasCtx.moveTo(x1, y1);
-        canvasCtx.lineTo(x2, y2);
-        canvasCtx.strokeStyle = `hsl(${i / bufferLength * 360}, 100%, 70%)`;
-        canvasCtx.lineWidth = 2;
-        canvasCtx.stroke();
-        angle += sliceAngle;
-    }
-}
-
-function drawWave() {
-    canvasCtx.fillStyle = '#1a1a1a';
-    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Get time domain data for wave visualization
+    analyser.getByteTimeDomainData(dataArray);
+    
+    // Draw the waveform
     canvasCtx.lineWidth = 2;
     canvasCtx.strokeStyle = 'hotpink';
     canvasCtx.beginPath();
+    
     const bufferLength = analyser.frequencyBinCount;
     const sliceWidth = canvas.width * 1.0 / bufferLength;
     let x = 0;
+    
     for (let i = 0; i < bufferLength; i++) {
         const v = dataArray[i] / 128.0;
         const y = v * canvas.height / 2;
+        
         if (i === 0) {
             canvasCtx.moveTo(x, y);
         } else {
@@ -258,27 +367,9 @@ function drawWave() {
         }
         x += sliceWidth;
     }
+    
     canvasCtx.lineTo(canvas.width, canvas.height / 2);
     canvasCtx.stroke();
-}
-
-function drawSoundwave() {
-    if (!analyser || !canvasCtx || !canvas) return;
-
-    switch(visualizerMode) {
-        case 'bars':
-            analyser.getByteFrequencyData(dataArray);
-            drawBars();
-            break;
-        case 'circle':
-            analyser.getByteFrequencyData(dataArray);
-            drawCircle();
-            break;
-        case 'wave':
-            analyser.getByteTimeDomainData(dataArray);
-            drawWave();
-            break;
-    }
 }
 
 function animate() {
