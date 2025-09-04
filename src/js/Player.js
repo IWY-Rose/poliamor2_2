@@ -1,8 +1,10 @@
 import * as THREE from 'three';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 
-let scene, camera, renderer, cube;
+let scene, camera, renderer, cdromModel;
 const container = document.getElementById('three-container');
-let rotationSpeed = 0.005; // Control the cube's rotation speed
+let rotationSpeed = 0.005; // Control the model's rotation speed
 
 // --- Camera Animation State ---
 let isCameraAnimating = false;
@@ -22,7 +24,10 @@ const songs = [
     'salto.mp3',
     'caida.mp3',
     'poliamor1.mp3',
-    'prueba01.mp3'
+    'prueba01.mp3',
+    'hellowelcome.mp3',
+    'cfnm.mp3',
+    'easy.mp3'
 ];
 let currentSongIndex = 0;
 let currentAudio = null;
@@ -129,7 +134,112 @@ async function setupLyrics(songIndex) {
     }
 }
 
-function init() {
+async function loadCdromModel() {
+    return new Promise((resolve, reject) => {
+        // Load textures manually first for better control
+        const textureLoader = new THREE.TextureLoader();
+        const basePath = '/models/cdrom01/';
+        
+        Promise.all([
+            new Promise(res => textureLoader.load(basePath + 'CdUvMap.png', res)),
+            new Promise(res => textureLoader.load(basePath + 'NormalMap (3).png', res)),
+            new Promise(res => textureLoader.load(basePath + 'AmbientOcclusionMap.png', res))
+        ]).then(([diffuseTexture, normalTexture, aoTexture]) => {
+            console.log('All textures loaded successfully');
+            
+            const mtlLoader = new MTLLoader();
+            mtlLoader.setPath(basePath);
+            
+            mtlLoader.load('cdrom01.mtl', (materials) => {
+                materials.preload();
+                
+                // Enhance the materials with our loaded textures
+                const cdMaterial = materials.materials.CdMaterial;
+                if (cdMaterial) {
+                    // Override with the proper diffuse texture (CdUvMap.png)
+                    cdMaterial.map = diffuseTexture;
+                    cdMaterial.normalMap = normalTexture;
+                    cdMaterial.aoMap = aoTexture;
+                    
+                    // Enhance material properties for CD appearance
+                    cdMaterial.metalness = 0.9;
+                    cdMaterial.roughness = 0.1;
+                    cdMaterial.transparent = false;
+                    
+                    // Ensure textures repeat correctly
+                    diffuseTexture.wrapS = diffuseTexture.wrapT = THREE.RepeatWrapping;
+                    normalTexture.wrapS = normalTexture.wrapT = THREE.RepeatWrapping;
+                    aoTexture.wrapS = aoTexture.wrapT = THREE.RepeatWrapping;
+                    
+                    console.log('Enhanced CdMaterial with all textures');
+                }
+                
+                const objLoader = new OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.setPath(basePath);
+                
+                objLoader.load('cdrom01.obj', (object) => {
+                    // Scale and position the model appropriately
+                    object.scale.setScalar(4); // Increased to see details better
+                    object.position.set(0, 0, 0);
+                    
+                    // Apply additional material enhancements
+                    object.traverse((child) => {
+                        if (child instanceof THREE.Mesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            
+                            if (child.material) {
+                                // Ensure the material is properly set up
+                                child.material.needsUpdate = true;
+                                
+                                // If MTL didn't apply properly, create manual material
+                                if (!child.material.map) {
+                                    console.log('Applying manual material to mesh');
+                                    child.material = new THREE.MeshPhysicalMaterial({
+                                        map: diffuseTexture,
+                                        normalMap: normalTexture,
+                                        aoMap: aoTexture,
+                                        metalness: 0.9,
+                                        roughness: 0.1,
+                                        clearcoat: 0.3,
+                                        clearcoatRoughness: 0.1
+                                    });
+                                }
+                            }
+                        }
+                    });
+                    
+                    console.log('CDROM model loaded with enhanced materials');
+                    resolve(object);
+                }, 
+                // Progress callback
+                (progress) => {
+                    console.log('OBJ Loading progress:', (progress.loaded / progress.total * 100) + '%');
+                },
+                // Error callback
+                (error) => {
+                    console.error('Error loading OBJ:', error);
+                    reject(error);
+                });
+            },
+            // Progress callback for MTL
+            (progress) => {
+                console.log('MTL Loading progress:', (progress.loaded / progress.total * 100) + '%');
+            },
+            // Error callback for MTL
+            (error) => {
+                console.error('Error loading MTL:', error);
+                reject(error);
+            });
+        }).catch((error) => {
+            console.error('Error loading textures:', error);
+            reject(error);
+        });
+    });
+}
+
+async function init() {
     // Scene
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
@@ -138,14 +248,50 @@ function init() {
     camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     camera.position.z = CAMERA_DISTANCE;
 
-    // Red Cube
-    const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-    cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    // Enhanced lighting setup for CD material
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+    scene.add(ambientLight);
+    
+    // Main light for CD reflection
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    directionalLight.position.set(5, 5, 5);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    scene.add(directionalLight);
+    
+    // Secondary light for better illumination
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight2.position.set(-5, -5, 5);
+    scene.add(directionalLight2);
+    
+    // Fill light from below
+    const directionalLight3 = new THREE.DirectionalLight(0x4444ff, 0.3);
+    directionalLight3.position.set(0, -5, 0);
+    scene.add(directionalLight3);
 
-    // Renderer
+    // Load CDROM Model
+    try {
+        console.log('Starting CDROM model loading...');
+        cdromModel = await loadCdromModel();
+        scene.add(cdromModel);
+        console.log('CDROM model added to scene successfully!');
+    } catch (error) {
+        console.error('Error loading CDROM model:', error);
+        // Fallback to original red cube if model fails to load
+        const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        cdromModel = new THREE.Mesh(geometry, material);
+        scene.add(cdromModel);
+        console.log('Fallback to red cube due to loading error');
+    }
+
+    // Renderer with enhanced settings
     renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
     if (container) {
         container.appendChild(renderer.domElement);
     }
@@ -392,9 +538,9 @@ function animate() {
         }
     }
 
-    if (cube) {
-        cube.rotation.x += rotationSpeed;
-        cube.rotation.y += rotationSpeed;
+    if (cdromModel) {
+        cdromModel.rotation.x += rotationSpeed;
+        cdromModel.rotation.y += rotationSpeed;
     }
 
     // Draw the soundwave
