@@ -9,7 +9,11 @@ let rotationSpeed = 0.005; // Control the model's rotation speed
 // --- Camera Animation State ---
 let isCameraAnimating = false;
 let cameraAnimationProgress = 0;
-const CAMERA_DISTANCE = 5;
+const CAMERA_DISTANCE = 15;
+
+// --- DVD-style Movement State ---
+let cdromVelocity = { x: 0.02, y: 0.015 }; // Movement speed
+let boundsCache = null; // Cache for performance
 
 // --- Audio Visualizer State ---
 let audioContext, analyser, sourceNode, dataArray;
@@ -463,6 +467,54 @@ async function playSong(index) {
     }
 }
 
+// Calculate visible bounds for DVD-style movement
+function calculateVisibleBounds() {
+    if (!camera) return { width: 10, height: 10 };
+    
+    // Calculate visible area at z=0 based on camera position and FOV
+    const distance = CAMERA_DISTANCE;
+    const vFOV = camera.fov * Math.PI / 180; // Convert to radians
+    const visibleHeight = 2 * Math.tan(vFOV / 2) * distance;
+    const visibleWidth = visibleHeight * camera.aspect;
+    
+    return {
+        width: visibleWidth,
+        height: visibleHeight
+    };
+}
+
+// Update CD-ROM position with DVD-style bouncing
+function updateCdromPosition() {
+    if (!cdromModel) return;
+    
+    // Cache bounds calculation for performance
+    if (!boundsCache || Math.random() < 0.01) { // Recalculate occasionally
+        boundsCache = calculateVisibleBounds();
+    }
+    
+    const bounds = boundsCache;
+    const margin = 4.5; // Margin from edges (adjust this value to change how far inside)
+    const halfWidth = (bounds.width / 2) - margin;
+    const halfHeight = (bounds.height / 2) - margin;
+    
+    // Update position
+    cdromModel.position.x += cdromVelocity.x;
+    cdromModel.position.y += cdromVelocity.y;
+    
+    // Check for collisions and bounce
+    if (cdromModel.position.x >= halfWidth || cdromModel.position.x <= -halfWidth) {
+        cdromVelocity.x = -cdromVelocity.x;
+        // Clamp position to stay within bounds
+        cdromModel.position.x = Math.max(-halfWidth, Math.min(halfWidth, cdromModel.position.x));
+    }
+    
+    if (cdromModel.position.y >= halfHeight || cdromModel.position.y <= -halfHeight) {
+        cdromVelocity.y = -cdromVelocity.y;
+        // Clamp position to stay within bounds
+        cdromModel.position.y = Math.max(-halfHeight, Math.min(halfHeight, cdromModel.position.y));
+    }
+}
+
 function onWindowResize() {
     if (container) {
         const width = container.clientWidth;
@@ -471,6 +523,9 @@ function onWindowResize() {
             camera.aspect = width / height;
             camera.updateProjectionMatrix();
             renderer.setSize(width, height);
+            
+            // Invalidate bounds cache when window resizes
+            boundsCache = null;
         }
     }
     
@@ -539,8 +594,12 @@ function animate() {
     }
 
     if (cdromModel) {
+        // Keep the rotation for visual appeal
         cdromModel.rotation.x += rotationSpeed;
         cdromModel.rotation.y += rotationSpeed;
+        
+        // Add DVD-style bouncing movement
+        updateCdromPosition();
     }
 
     // Draw the soundwave
