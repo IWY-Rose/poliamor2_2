@@ -3,117 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌈 GOLGI STUDIOS ~ Music & Games ~ Surreal Experience 🌈</title>
+    <title>poliamor2.cl</title>
     <link rel="stylesheet" href="/styles/retro.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 </head>
-<body class="game-menu-body">
-    <!-- Game Menu Container -->
-    <div class="game-menu-container">
-        <!-- Header Section -->
-        <div class="game-menu-header">
-            <h1 class="game-title">GOLGI STUDIOS</h1>
-            <div class="game-subtitle">♪ Music & Game Experience ♪</div>
-            <div class="decorative-line"></div>
+<body class="splash">
+    <div class="stage">
+        <h1 class="brand-title">poliamor2.cl</h1>
+
+        <div class="panel">
+            <a href="game.html" class="wood-btn">jugar</a>
+            <a href="gallery.html" class="wood-btn">about</a>
+            <a href="player.html" class="wood-btn">extras</a>
         </div>
 
-        <!-- Main Menu -->
-        <div class="main-menu">
-            <!-- Primary Actions -->
-            <a href="game.html" class="menu-button primary-button play-btn">
-                <div class="button-content">
-                    <span class="button-icon">🎮</span>
-                    <span class="button-label">PLAY GAME</span>
-                </div>
-            </a>
+        <!-- Bottom-left mute icon (visual) -->
+        <svg class="mute-badge" viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+                <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#e05151"/>
+                    <stop offset="100%" stop-color="#c72e2e"/>
+                </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="90" fill="none" stroke="url(#red)" stroke-width="20"/>
+            <path d="M70 90 H45 a10 10 0 0 0 -10 10 v0 a10 10 0 0 0 10 10 H70 L100 140 V60 Z" fill="#8a8a8a"/>
+            <line x1="38" y1="162" x2="162" y2="38" stroke="url(#red)" stroke-width="18" stroke-linecap="round"/>
+        </svg>
 
-            <a href="gallery.html" class="menu-button primary-button info-btn">
-                <div class="button-content">
-                    <span class="button-icon">🖼️</span>
-                    <span class="button-label">GALLERY</span>
-                </div>
-            </a>
-        </div>
+        <!-- Bottom-right watermark -->
+        <div class="watermark">golgi studios ©</div>
 
-        <!-- Enter Section -->
-        <div class="enter-section">
-            <div class="enter-arrows">
-                <span class="arrow">►</span>
-                <span class="arrow">►</span>
-            </div>
-            <div class="enter-text">ALERTA</div>
-            <div class="enter-arrows">
-                <span class="arrow">◄</span>
-                <span class="arrow">◄</span>
-            </div>
-        </div>
-
-        <!-- Warning Notice -->
-        <div class="warning-notice">
-            <div class="warning-icon">⚠️</div>
-            <div class="warning-text">Contains Flashing Lights!</div>
-        </div>
-
-        <!-- Footer with visitor counter -->
-        <div class="game-menu-footer">
-            <div class="visitor-counter">
-                <span class="counter-label">Visitors:</span>
-                <span class="counter-number" id="visitorCount">000001337</span>
-            </div>
-            <div class="footer-text">Welcome to our digital dimension!</div>
+        <!-- Visitors counter (kept) -->
+        <div class="visitors">
+            <span class="counter-label">Visitors:</span>
+            <span class="counter-number" id="visitorCount">000001337</span>
         </div>
     </div>
-
-    <!-- Floating background elements -->
-    <div class="bg-floating-element">🌟</div>
-    <div class="bg-floating-element">🎵</div>
-    <div class="bg-floating-element">🎮</div>
-    <div class="bg-floating-element">💫</div>
 
     <script>
         // Simple visitor counter animation
         function animateCounter() {
             const counter = document.getElementById('visitorCount');
             let count = 1337;
-            
             setInterval(() => {
                 count = Math.floor(Math.random() * 9999) + 1337;
                 counter.textContent = count.toString().padStart(9, '0');
             }, 5000);
         }
-
-        // Sparkle effect on hover
-        document.querySelectorAll('.menu-button').forEach(button => {
-            button.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.05)';
-            });
-            
-            button.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
-        });
-
-        // Initialize effects
-        document.addEventListener('DOMContentLoaded', () => {
-            animateCounter();
-            
-            // Simple sparkle effect
-            setInterval(() => {
-                if (Math.random() > 0.7) {
-                    createSparkle();
-                }
-            }, 1000);
-        });
-
-        function createSparkle() {
-            const sparkle = document.createElement('div');
-            sparkle.className = 'menu-sparkle';
-            sparkle.style.left = Math.random() * window.innerWidth + 'px';
-            sparkle.style.top = Math.random() * window.innerHeight + 'px';
-            document.body.appendChild(sparkle);
-            
-            setTimeout(() => sparkle.remove(), 2000);
-        }
+        document.addEventListener('DOMContentLoaded', animateCounter);
     </script>
 </body>
 </html>
