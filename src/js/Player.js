@@ -31,7 +31,8 @@ const songs = [
     'prueba01.mp3',
     'hellowelcome.mp3',
     'cfnm.mp3',
-    'easy.mp3'
+    'easy.mp3', 
+    'paristexas.mp3'
 ];
 let currentSongIndex = 0;
 let currentAudio = null;
