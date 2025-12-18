@@ -33,7 +33,9 @@ const songs = [
     'cfnm.mp3',
     'easy.mp3', 
     'paristexas.mp3',
-    'version_slow.mp3'
+    'version_slow.mp3',
+    'La Revuelta.mp3',
+    'no soi un ser de luz.mp3'
 ];
 let currentSongIndex = 0;
 let currentAudio = null;
