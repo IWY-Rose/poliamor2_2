@@ -353,7 +353,8 @@ body.splash { display: grid; place-items: center; }
     justify-content: center;
     align-items: center;
     height: 100vh;
-    padding: 20px; /* background removed to inherit sky */
+    padding: 20px;
+    background: url('/refs/bounce_01.png') center center / cover no-repeat;
 }
 
 .player-container {

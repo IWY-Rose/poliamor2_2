@@ -35,7 +35,11 @@ const songs = [
     /* 'paristexas.mp3', */
     'version_slow.mp3',
     'La Revuelta.mp3',
-    'no soi un ser de luz.mp3'
+    'no soi un ser de luz.mp3',
+    'caida(copy).mp3',
+    'caida(another copy).mp3',
+    'caida(3rd copy).mp3',
+    'caida(4th copy).mp3'
 ];
 let currentSongIndex = 0;
 let currentAudio = null;
@@ -415,6 +419,8 @@ function updatePlaylistSelection() {
     playlistItems.forEach((item, index) => {
         if (index === currentSongIndex) {
             item.classList.add('selected');
+            // Scroll the selected item into view if it's not visible
+            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
             item.classList.remove('selected');
         }
