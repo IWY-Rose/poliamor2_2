@@ -37,14 +37,14 @@
       // Replace YOUR_DOMAIN and YOUR_STOREFRONT_ACCESS_TOKEN
       // with values from your Shopify admin
       var client = ShopifyBuy.buildClient({
-        domain: 'YOUR-STORE.myshopify.com',
-        storefrontAccessToken: 'YOUR_STOREFRONT_ACCESS_TOKEN',
+        domain: '0xzujc-1t.myshopify.com',
+        storefrontAccessToken: 'dcb71369523740912239b6173399a6e0',
       });
 
       ShopifyBuy.UI.onReady(client).then(function (ui) {
         // Add one of these blocks per product
         ui.createComponent('product', {
-          id: 'YOUR_PRODUCT_ID',  // from Shopify admin
+          id: '9479548240101',  // from Shopify admin
           node: document.getElementById('shopify-products'),
           moneyFormat: '%24%7B%7Bamount%7D%7D',
           options: {
