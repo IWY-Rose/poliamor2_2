@@ -544,3 +544,27 @@ body.splash { display: grid; place-items: center; }
     .action-btn { width: 80%; max-width: 300px; }
     .content-section { margin: 20px 10px; padding: 20px; }
 }
+
+
+.widget-container {
+    display: flex;
+    justify-content: center;
+    margin: 2rem auto;
+}
+
+.hearts-widget {
+    width: 200px;       /* adjust to taste */
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+@keyframes nudge-right {
+    0%   { transform: translateX(0); }
+    40%  { transform: translateX(30px); }
+    100% { transform: translateX(0); }
+}
+
+.hearts-widget.nudge {
+    animation: nudge-right 0.4s ease-in-out;
+}

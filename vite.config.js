@@ -11,7 +11,9 @@ export default defineConfig({
                 main: resolve(__dirname, 'index.html'),
                 game: resolve(__dirname, 'game.html'),
                 gallery: resolve(__dirname, 'gallery.html'),
-                player: resolve(__dirname, 'player.html')
+                player: resolve(__dirname, 'player.html'),
+                merch: resolve(__dirname, 'merch.html'),
+                test: resolve(__dirname, 'test.html')
             },
             output: {
                 manualChunks: {

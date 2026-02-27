@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>merch - poliamor2.cl</title>
+    <link rel="stylesheet" href="/styles/retro.css">
+    <script src="https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js"></script>
+</head>
+<body>
+    <!-- Navigation banner to get back -->
+    <nav class="nav-banner">
+        <div class="nav-buttons">
+            <a href="../index.html" class="nav-btn home">home</a>
+            <a href="../game.html" class="nav-btn game">jugar</a>
+            <a href="../player.html" class="nav-btn">extras</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <h1 class="main-title">merch</h1>
+        <div class="widget-container">
+            <img
+                src="/images/gif0.gif"
+                alt="Animated hearts"
+                class="hearts-widget"
+                id="hearts-widget"
+            />
+        </div>
+
+        <!-- Shopify Buy Button products will be injected here -->
+        <div id="shopify-products"></div>
+    </div>
+
+    <script>
+      // Shopify Buy Button initialization
+      // Replace YOUR_DOMAIN and YOUR_STOREFRONT_ACCESS_TOKEN
+      // with values from your Shopify admin
+      var client = ShopifyBuy.buildClient({
+        domain: 'YOUR-STORE.myshopify.com',
+        storefrontAccessToken: 'YOUR_STOREFRONT_ACCESS_TOKEN',
+      });
+
+      ShopifyBuy.UI.onReady(client).then(function (ui) {
+        // Add one of these blocks per product
+        ui.createComponent('product', {
+          id: 'YOUR_PRODUCT_ID',  // from Shopify admin
+          node: document.getElementById('shopify-products'),
+          moneyFormat: '%24%7B%7Bamount%7D%7D',
+          options: {
+            product: {
+              styles: {
+                product: { '@media (min-width: 601px)': { 'max-width': '400px' } }
+              }
+            }
+          }
+        });
+      });
+    </script>
+    <script>
+        document.getElementById('hearts-widget').addEventListener('click', function() {
+            this.classList.add('nudge');
+            setTimeout(() => this.classList.remove('nudge'), 400);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test ~ poliamor2.cl</title>
+    <link rel="stylesheet" href="/styles/retro.css">
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <nav class="nav-banner">
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-btn home">HOME</a>
+        </div>
+    </nav>
+
+    <button id="startBtn" style="
+        position: fixed; z-index: 10; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem; padding: 1em 2em;
+        cursor: pointer; background: #ff69b4; color: #fff;
+        border: none; border-radius: 12px;
+    ">START</button>
+
+    <canvas id="testCanvas"></canvas>
+    <script type="module" src="/src/js/test.js"></script>
+</body>
+</html>
