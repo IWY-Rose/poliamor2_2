@@ -19,6 +19,6 @@
 
     function init() {
         spawn();
-        setInterval(spawn, 10000);
+        setInterval(spawn, 8000);
     }
 })();
