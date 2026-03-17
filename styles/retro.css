@@ -6,21 +6,35 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+}
+
 /* Site-wide background + defaults */
 body {
     margin: 0;
     padding: 0;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-    background:
-        radial-gradient(ellipse at 20% 20%, rgba(255,255,255,0.9) 0 22%, rgba(255,255,255,0) 60%),
-        radial-gradient(ellipse at 80% 25%, rgba(255,255,255,0.9) 0 18%, rgba(255,255,255,0) 58%),
-        radial-gradient(ellipse at 30% 70%, rgba(255,255,255,0.9) 0 20%, rgba(255,255,255,0) 60%),
-        radial-gradient(ellipse at 75% 80%, rgba(255,255,255,0.9) 0 15%, rgba(255,255,255,0) 55%),
-        linear-gradient(#bcd9ff, #9ec4ff 40%, #cfe6ff);
-    background-size: 900px 500px, 900px 500px, 900px 500px, 900px 500px, 100% 100%;
+    background-color: #a8d4ff;
     min-height: 100vh;
-    overflow-x: hidden;
     color: #111;
+}
+
+.cloud-layer {
+    position: fixed;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: no-repeat center / 100% 100%;
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
+    animation: scroll-clouds 35s linear forwards;
+}
+
+@keyframes scroll-clouds {
+    from { transform: translateY(100vh); }
+    to   { transform: translateY(-100vh); }
 }
 
 /* Headings use the hand-drawn look site-wide */
@@ -50,6 +64,7 @@ body.splash { display: grid; place-items: center; }
 
 .stage {
     position: relative;
+    z-index: 1;
     width: min(980px, 92vw);
     height: min(680px, 88vh);
 }
@@ -249,14 +264,15 @@ body.splash { display: grid; place-items: center; }
 .nav-btn.gallery { background: linear-gradient(45deg, #9370db, #ff69b4); }
 
 /* Main Content wrappers (for gallery and other pages) */
-.main-content { padding: 40px 20px; text-align: center; position: relative; }
+.main-content { padding: 12px 20px 40px; text-align: center; position: relative; z-index: 1; }
 
 /* Big titles on internal pages now render with brush font via h1 rule */
 .main-title {
     font-size: clamp(2rem, 8vw, 4rem);
     color: #cf3a3a;
     text-shadow: 0 2px 0 rgba(0,0,0,0.05), 0 12px 25px rgba(181,52,52,0.25);
-    margin-bottom: 30px;
+    margin-top: 0;
+    margin-bottom: 16px;
 }
 
 /* Subtitles and sections kept from previous theme */
@@ -376,10 +392,12 @@ body.splash { display: grid; place-items: center; }
     align-items: center;
     height: 100vh;
     padding: 20px;
-    background: url('/refs/bounce_01.png') center center / cover no-repeat;
+    /* background: url('/refs/bounce_01.png') center center / cover no-repeat; */
 }
 
 .player-container {
+    position: relative;
+    z-index: 1;
     width: 90vw;
     height: 85vh;
     display: flex;

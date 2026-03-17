@@ -45,7 +45,6 @@
     </div>
 
     <script>
-        // Simple visitor counter animation
         function animateCounter() {
             const counter = document.getElementById('visitorCount');
             let count = 1337;
@@ -54,7 +53,9 @@
                 counter.textContent = count.toString().padStart(9, '0');
             }, 5000);
         }
+
         document.addEventListener('DOMContentLoaded', animateCounter);
     </script>
+    <script src="/src/js/clouds.js"></script>
 </body>
 </html>
