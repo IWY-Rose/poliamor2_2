@@ -1,5 +1,5 @@
 (function () {
-    const images = ['/public/images/nubes0.png', '/public/images/nubes01.png'];
+    const images = ['/images/nubes0.png', '/images/nubes01.png'];
     let index = 0;
 
     function spawn() {

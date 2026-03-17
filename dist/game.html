@@ -3,17 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>juegito</title>
-  <script type="module" crossorigin src="./assets/game-DojhEs4O.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/three-BtSkMtSD.js">
-  <link rel="stylesheet" crossorigin href="./assets/main--_8EQwCQ.css">
+    <title>🎮 Game ~ GOLGI STUDIOS ~ Surreal Experience 🎮</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+    <style>
+        /* Override some retro styles for game page */
+        body {
+            background: #000; /* Dark background for game */
+            animation: none; /* No animated background for game performance */
+        }
+        
+        .nav-banner {
+            position: relative;
+            z-index: 1001; /* Above game content */
+        }
+        
+        #game-buttons {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            border: 3px solid #ff69b4;
+        }
+        
+        #startGameButton, #startMutedButton, #startMobileButton {
+            font-family: 'Fredoka One', cursive;
+            text-transform: uppercase;
+            border: 2px solid #fff;
+            border-radius: 10px;
+        }
+    </style>
+  <script type="module" crossorigin src="./assets/game-Bgu7oeED.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="./assets/three-fwGzQaZj.js">
+  <link rel="modulepreload" crossorigin href="./assets/GLTFLoader-Cbe0BlJV.js">
+  <link rel="stylesheet" crossorigin href="./assets/game--_8EQwCQ.css">
+  <link rel="stylesheet" crossorigin href="./assets/retro-DHApuW4I.css">
 </head>
 <body>
+    <!-- Navigation Banner -->
+    <nav class="nav-banner">
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-btn home">🏠 HOME</a>
+            <a href="game.html" class="nav-btn game">🎮 GAME</a>
+            <a href="gallery.html" class="nav-btn gallery">🖼️ GALLERY</a>
+        </div>
+    </nav>
+
     <div id="game-buttons">
         <button id="startGameButton">Start Game</button>
         <button id="startMutedButton">Start Game on Mute</button>
         <button id="startMobileButton">Start Game on Mobile</button>
     </div>
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="gameCanvas"></canvas>
 </body>
 </html>

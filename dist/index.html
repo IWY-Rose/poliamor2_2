@@ -3,40 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wauu</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        a:hover {
-            background-color: #0056b3;
-        }
-    </style>
-  <link rel="stylesheet" crossorigin href="./assets/main--_8EQwCQ.css">
+    <title>poliamor2.cl</title>
+  <link rel="stylesheet" crossorigin href="./assets/retro-DHApuW4I.css">
 </head>
-<body>
-    <h1>Golgi Studios juego numero 1, verssion 0,2</h1>
-    <a href="game.html">Play Game</a>
-    <p>TRIGGER WARNING
-        <br> This game is not recommended for people with epilepsy or those who are easily triggered.
-        <br>muchas lucees cuidao
-    </p>
-    <!-- <p>muchas lucees cuidao</p> -->
+<body class="splash">
+    <div class="stage">
+        <h1 class="brand-title">poliamor2.cl</h1>
+
+        <div class="panel">
+            <a href="index.html" class="wood-btn">jugar</a>
+            <a href="index.html" class="wood-btn">about</a>
+            <a href="index.html" class="wood-btn">extras</a>
+            <a href="index.html" class="wood-btn">test</a>
+        </div>
+
+        <a href="merch.html" class="merch-widget">
+            <img src="./images/gif0.gif" alt="Merch" class="merch-gif">
+        </a>
+
+        <!-- Bottom-left mute icon (visual) -->
+        <svg class="mute-badge" viewBox="0 0 200 200" aria-hidden="true">
+            <defs>
+                <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#e05151"/>
+                    <stop offset="100%" stop-color="#c72e2e"/>
+                </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="90" fill="none" stroke="url(#red)" stroke-width="20"/>
+            <path d="M70 90 H45 a10 10 0 0 0 -10 10 v0 a10 10 0 0 0 10 10 H70 L100 140 V60 Z" fill="#8a8a8a"/>
+            <line x1="38" y1="162" x2="162" y2="38" stroke="url(#red)" stroke-width="18" stroke-linecap="round"/>
+        </svg>
+
+        <!-- Bottom-right watermark -->
+        <div class="watermark">golgi studios ©</div>
+
+        <!-- Visitors counter (kept) -->
+        <div class="visitors">
+            <span class="counter-label">Visitors:</span>
+            <span class="counter-number" id="visitorCount">000001337</span>
+        </div>
+    </div>
+
+    <script>
+        function animateCounter() {
+            const counter = document.getElementById('visitorCount');
+            let count = 1337;
+            setInterval(() => {
+                count = Math.floor(Math.random() * 9999) + 1337;
+                counter.textContent = count.toString().padStart(9, '0');
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', animateCounter);
+    </script>
+    <script src="./js/clouds.js"></script>
 </body>
 </html>
