@@ -5,7 +5,7 @@ export default defineConfig({
     base: './',
     publicDir: 'public',
     build: {
-        assetsInlineLimit: 4096, // Optimize asset inlining
+        assetsInlineLimit: 4096,
         rollupOptions: {
             input: {
                 main: resolve(__dirname, 'index.html'),
@@ -22,10 +22,16 @@ export default defineConfig({
             }
         }
     },
-    server: {
-        headers: {
-            'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'require-corp'
+    plugins: [{
+        name: 'game-coep-headers',
+        configureServer(server) {
+            server.middlewares.use((req, res, next) => {
+                if (req.url === '/game.html' || req.url === '/game') {
+                    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+                    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+                }
+                next();
+            });
         }
-    }
+    }]
 }); 
