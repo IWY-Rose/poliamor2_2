@@ -20,21 +20,26 @@ body {
     color: #111;
 }
 
-.cloud-layer {
+/* Scrolling cloud background — uses a single vertically-tileable image.
+   The pseudo-element is 200vh tall with the texture repeated twice;
+   translating by -50% shifts exactly one tile, producing a seamless loop. */
+body::before {
+    content: '';
     position: fixed;
+    top: 0;
     left: 0;
     width: 100%;
-    height: 100vh;
-    background: no-repeat center / 100% 100%;
-    pointer-events: none;
+    height: 200vh;
     z-index: 0;
+    pointer-events: none;
+    background: url('/images/nubes07.webp') repeat-y center / 100% 50%;
     will-change: transform;
-    animation: scroll-clouds 35s linear forwards;
+    animation: scroll-clouds 35s linear infinite;
 }
 
 @keyframes scroll-clouds {
-    from { transform: translateY(100vh); }
-    to   { transform: translateY(-100vh); }
+    from { transform: translateY(0); }
+    to   { transform: translateY(-50%); }
 }
 
 /* Headings use the hand-drawn look site-wide */
