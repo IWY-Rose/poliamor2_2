@@ -239,7 +239,7 @@ body.splash { display: grid; place-items: center; }
     margin-top: 10px;
 }
 .nav-btn {
-    background: linear-gradient(45deg, #ff69b4, #00bfff);
+    background: url('/images/btn01.png') center / cover;
     color: white;
     padding: 12px 25px;
     text-decoration: none;
@@ -249,7 +249,11 @@ body.splash { display: grid; place-items: center; }
     font-size: 16px;
     font-weight: bold;
     text-transform: uppercase;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.35);
+    box-shadow:
+        0 4px 0 #4a4a2e,
+        0 8px 16px rgba(0,0,0,0.3),
+        inset 0 0 0 1px rgba(255,255,255,0.1);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -260,9 +264,9 @@ body.splash { display: grid; place-items: center; }
     animation: bounce 0.6s infinite;
 }
 @keyframes bounce { 0%, 100% { transform: scale(1.1) rotate(-2deg) translateY(0); } 50% { transform: scale(1.1) rotate(-2deg) translateY(-5px); } }
-.nav-btn.home { background: linear-gradient(45deg, #ff1493, #ffd700); }
-.nav-btn.game { background: linear-gradient(45deg, #00ff00, #ff4500); }
-.nav-btn.gallery { background: linear-gradient(45deg, #9370db, #ff69b4); }
+.nav-btn.home,
+.nav-btn.game,
+.nav-btn.gallery { background: url('/images/btn01.png') center / cover; }
 
 /* Main Content wrappers (for gallery and other pages) */
 .main-content { padding: 12px 20px 40px; text-align: center; position: relative; z-index: 1; }
