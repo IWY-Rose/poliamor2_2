@@ -111,27 +111,29 @@ body.splash { display: grid; place-items: center; }
 .panel::before {
     content: '';
     position: absolute;
-    inset: -14px;
+    inset: -50px;
     background: url('/images/box03.png') center / cover;
     z-index: -1;
     opacity: 0.55;
     pointer-events: none;
-    will-change: filter;
+    will-change: filter, clip-path;
     filter: url(#flag-wave);
+    clip-path: var(--panel-clip, inset(36px));
 }
 
 .panel::after {
     content: '';
     position: absolute;
-    inset: -14px;
+    inset: -50px;
     background: url('/images/box03.png') center / cover;
     z-index: -1;
     opacity: 0;
     pointer-events: none;
-    will-change: filter;
+    will-change: filter, clip-path;
     filter: url(#flag-wave-mouse);
-    -webkit-mask-image: radial-gradient(circle 150px at calc(var(--mx) + 14px) calc(var(--my) + 14px), rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
-    mask-image: radial-gradient(circle 150px at calc(var(--mx) + 14px) calc(var(--my) + 14px), rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
+    clip-path: var(--panel-clip, inset(36px));
+    -webkit-mask-image: radial-gradient(circle 150px at calc(var(--mx) + 50px) calc(var(--my) + 50px), rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
+    mask-image: radial-gradient(circle 150px at calc(var(--mx) + 50px) calc(var(--my) + 50px), rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
     transition: opacity 0.1s ease-out;
 }
 
