@@ -83,143 +83,25 @@
             }, 5000);
         }
 
-        function initSlimePanel() {
+        function initPanelMouse() {
             const panel = document.querySelector('.panel');
             if (!panel) return;
 
-            const INSET = 50;
-            const REST_INSET = 36;       // INSET - original 14px visual margin
-            const PTS = 10;              // points per edge
-            const RADIUS = 140;          // mouse influence radius (px)
-            const STRENGTH = 0.18;       // how hard the mouse pulls points
-            const STIFFNESS = 0.045;     // spring pull-back force
-            const DAMPING = 0.88;        // velocity retained per frame (< 1 = bouncy)
-            const MAX_STRETCH = 32;      // max displacement from rest (px)
-
-            let points = [];
-            let mx = null, my = null;
-            let raf = null;
-
-            function buildPoints() {
-                points = [];
-                const bw = panel.offsetWidth + INSET * 2;
-                const bh = panel.offsetHeight + INSET * 2;
-                const l = REST_INSET, t = REST_INSET;
-                const r = bw - REST_INSET, b = bh - REST_INSET;
-
-                for (let i = 0; i <= PTS; i++) {
-                    const rx = l + (i / PTS) * (r - l);
-                    points.push({ rx, ry: t, x: rx, y: t, vx: 0, vy: 0 });
-                }
-                for (let i = 1; i <= PTS; i++) {
-                    const ry = t + (i / PTS) * (b - t);
-                    points.push({ rx: r, ry, x: r, y: ry, vx: 0, vy: 0 });
-                }
-                for (let i = 1; i <= PTS; i++) {
-                    const rx = r - (i / PTS) * (r - l);
-                    points.push({ rx, ry: b, x: rx, y: b, vx: 0, vy: 0 });
-                }
-                for (let i = 1; i < PTS; i++) {
-                    const ry = b - (i / PTS) * (b - t);
-                    points.push({ rx: l, ry, x: l, y: ry, vx: 0, vy: 0 });
-                }
-            }
-
-            function step() {
-                let energy = 0;
-                for (const p of points) {
-                    if (mx !== null) {
-                        const pmx = mx + INSET;
-                        const pmy = my + INSET;
-                        const dx = pmx - p.x;
-                        const dy = pmy - p.y;
-                        const d = Math.hypot(dx, dy);
-                        if (d < RADIUS && d > 0.5) {
-                            const f = ((1 - d / RADIUS) ** 2) * STRENGTH;
-                            p.vx += dx * f;
-                            p.vy += dy * f;
-                        }
-                    }
-                    p.vx += (p.rx - p.x) * STIFFNESS;
-                    p.vy += (p.ry - p.y) * STIFFNESS;
-                    p.vx *= DAMPING;
-                    p.vy *= DAMPING;
-
-                    let nx = p.x + p.vx;
-                    let ny = p.y + p.vy;
-                    const ddx = nx - p.rx, ddy = ny - p.ry;
-                    const dd = Math.hypot(ddx, ddy);
-                    if (dd > MAX_STRETCH) {
-                        const s = MAX_STRETCH / dd;
-                        nx = p.rx + ddx * s;
-                        ny = p.ry + ddy * s;
-                        p.vx *= 0.5;
-                        p.vy *= 0.5;
-                    }
-                    p.x = nx;
-                    p.y = ny;
-                    energy += p.vx * p.vx + p.vy * p.vy;
-                }
-                return energy;
-            }
-
-            function render() {
-                const bw = panel.offsetWidth + INSET * 2;
-                const bh = panel.offsetHeight + INSET * 2;
-                const poly = points
-                    .map(p => `${(p.x / bw * 100).toFixed(2)}% ${(p.y / bh * 100).toFixed(2)}%`)
-                    .join(',');
-                panel.style.setProperty('--panel-clip', `polygon(${poly})`);
-            }
-
-            function tick() {
-                const energy = step();
-                render();
-                if (energy > 0.0001 || mx !== null) {
-                    raf = requestAnimationFrame(tick);
-                } else {
-                    raf = null;
-                }
-            }
-
-            function go() { if (!raf) raf = requestAnimationFrame(tick); }
-
-            buildPoints();
-            window.addEventListener('resize', () => { buildPoints(); go(); });
-
-            document.addEventListener('mousemove', (e) => {
+            panel.addEventListener('mousemove', (e) => {
                 const rect = panel.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
-                    panel.style.setProperty('--mx', `${x}px`);
-                    panel.style.setProperty('--my', `${y}px`);
-                }
-
-                const margin = RADIUS;
-                if (x > -margin && x < rect.width + margin &&
-                    y > -margin && y < rect.height + margin) {
-                    mx = x;
-                    my = y;
-                    go();
-                } else if (mx !== null) {
-                    mx = null;
-                    my = null;
-                }
+                panel.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+                panel.style.setProperty('--my', `${e.clientY - rect.top}px`);
             });
 
             panel.addEventListener('mouseleave', () => {
                 panel.style.setProperty('--mx', '50%');
                 panel.style.setProperty('--my', '50%');
-                mx = null;
-                my = null;
             });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             animateCounter();
-            initSlimePanel();
+            initPanelMouse();
         });
     </script>
 </body>
