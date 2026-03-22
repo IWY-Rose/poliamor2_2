@@ -7,6 +7,23 @@
     <link rel="stylesheet" href="/styles/retro.css">
 </head>
 <body class="splash">
+    <!-- SVG displacement filter for flag-wave texture -->
+    <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+        <defs>
+            <filter id="flag-wave" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="turbulence" baseFrequency="0.012 0.025"
+                    numOctaves="3" seed="2" result="noise">
+                    <animate attributeName="baseFrequency" dur="12s"
+                        keyTimes="0;0.5;1"
+                        values="0.012 0.025;0.018 0.035;0.012 0.025"
+                        repeatCount="indefinite"/>
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="noise"
+                    scale="18" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+        </defs>
+    </svg>
+
     <div class="stage">
         <h1 class="brand-title">poliamor2.cl</h1>
 
@@ -22,7 +39,7 @@
         </a>
 
         <!-- Bottom-left mute icon (visual) -->
-        <svg class="mute-badge" viewBox="0 0 200 200" aria-hidden="true">
+        <!--<svg class="mute-badge" viewBox="0 0 200 200" aria-hidden="true">
             <defs>
                 <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stop-color="#e05151"/>
@@ -32,16 +49,16 @@
             <circle cx="100" cy="100" r="90" fill="none" stroke="url(#red)" stroke-width="20"/>
             <path d="M70 90 H45 a10 10 0 0 0 -10 10 v0 a10 10 0 0 0 10 10 H70 L100 140 V60 Z" fill="#8a8a8a"/>
             <line x1="38" y1="162" x2="162" y2="38" stroke="url(#red)" stroke-width="18" stroke-linecap="round"/>
-        </svg>
+        </svg>-->
 
         <!-- Bottom-right watermark -->
-        <div class="watermark">golgi studios ©</div>
+        <!--<div class="watermark">golgi studios ©</div>-->
 
         <!-- Visitors counter (kept) -->
-        <div class="visitors">
+        <!--<div class="visitors">
             <span class="counter-label">Visitors:</span>
             <span class="counter-number" id="visitorCount">000001337</span>
-        </div>
+        </div>-->
     </div>
 
     <script>
