@@ -103,6 +103,9 @@ body.splash { display: grid; place-items: center; }
     justify-items: center;
     overflow: visible;
     z-index: 1;
+
+    --mx: 50%;
+    --my: 50%;
 }
 
 .panel::before {
@@ -115,6 +118,25 @@ body.splash { display: grid; place-items: center; }
     pointer-events: none;
     will-change: filter;
     filter: url(#flag-wave);
+}
+
+.panel::after {
+    content: '';
+    position: absolute;
+    inset: -14px;
+    background: url('/images/box03.png') center / cover;
+    z-index: -1;
+    opacity: 0;
+    pointer-events: none;
+    will-change: filter;
+    filter: url(#flag-wave-mouse);
+    -webkit-mask-image: radial-gradient(circle 150px at calc(var(--mx) + 14px) calc(var(--my) + 14px), rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
+    mask-image: radial-gradient(circle 150px at calc(var(--mx) + 14px) calc(var(--my) + 14px), rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
+    transition: opacity 0.1s ease-out;
+}
+
+.panel:hover::after {
+    opacity: 0.95;
 }
 
 .wood-btn {
@@ -134,9 +156,14 @@ body.splash { display: grid; place-items: center; }
         0 6px 0 #4a4a2e,
         0 12px 20px rgba(0,0,0,0.35),
         inset 0 0 0 1px rgba(255,255,255,0.1);
-    transition: transform 120ms ease, box-shadow 120ms ease, filter 200ms ease;
+    transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
 }
-.wood-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.wood-btn:hover {
+    transform: scale(1.12);
+    filter: invert(1) brightness(1.1)
+        drop-shadow(0 0 15px rgba(255,255,255,0.5))
+        drop-shadow(0 0 35px rgba(255,200,100,0.25));
+}
 .wood-btn:active {
     transform: translateY(4px);
     box-shadow: 0 2px 0 #4a4a2e, 0 6px 12px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.1);

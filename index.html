@@ -21,6 +21,18 @@
                 <feDisplacementMap in="SourceGraphic" in2="noise"
                     scale="18" xChannelSelector="R" yChannelSelector="G"/>
             </filter>
+
+            <filter id="flag-wave-mouse" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="turbulence" baseFrequency="0.02 0.04"
+                    numOctaves="3" seed="7" result="noise">
+                    <animate attributeName="baseFrequency" dur="12s"
+                        keyTimes="0;0.5;1"
+                        values="0.02 0.04;0.03 0.055;0.02 0.04"
+                        repeatCount="indefinite"/>
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="noise"
+                    scale="85" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
         </defs>
     </svg>
 
@@ -71,7 +83,26 @@
             }, 5000);
         }
 
-        document.addEventListener('DOMContentLoaded', animateCounter);
+        function initPanelMouse() {
+            const panel = document.querySelector('.panel');
+            if (!panel) return;
+
+            panel.addEventListener('mousemove', (e) => {
+                const rect = panel.getBoundingClientRect();
+                panel.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+                panel.style.setProperty('--my', `${e.clientY - rect.top}px`);
+            });
+
+            panel.addEventListener('mouseleave', () => {
+                panel.style.setProperty('--mx', '50%');
+                panel.style.setProperty('--my', '50%');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            animateCounter();
+            initPanelMouse();
+        });
     </script>
 </body>
 </html>
